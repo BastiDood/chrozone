@@ -1,11 +1,10 @@
 #![no_std]
+extern crate alloc;
 
 mod interaction;
 
 use hyper::{Body, HeaderMap, Method, Response, StatusCode};
 use ring::signature::UnparsedPublicKey;
-
-pub type MaybeResponse = core::result::Result<Response<Body>, StatusCode>;
 
 pub fn from_err_status(code: StatusCode) -> Response<Body> {
     let mut res = Response::new(Body::empty());
@@ -19,7 +18,7 @@ pub async fn try_respond<B>(
     path: &str,
     headers: &HeaderMap,
     pub_key: &UnparsedPublicKey<B>,
-) -> MaybeResponse
+) -> core::result::Result<Response<Body>, StatusCode>
 where
     B: AsRef<[u8]>,
 {
@@ -50,5 +49,8 @@ where
     // Parse incoming interaction
     let interaction = serde_json::from_slice(&payload).map_err(|_| StatusCode::BAD_REQUEST)?;
     drop(payload);
-    interaction::try_respond(interaction)
+
+    let reply = interaction::respond(interaction);
+    let body = serde_json::to_string(&reply).map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?.into();
+    Ok(Response::new(body))
 }
