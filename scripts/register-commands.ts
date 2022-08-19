@@ -26,6 +26,7 @@ const response = await fetch(endpoint, {
                     name: 'timezone',
                     description: 'The timezone to base the date from. Autocompletions are enabled.',
                     required: true,
+                    autocomplete: true,
                     min_value: 1,
                     max_value: 1,
                 },
