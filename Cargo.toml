@@ -12,6 +12,11 @@ ring = { version = "0.16", default-features = false }
 tokio = { version = "1.20", features = ["net", "rt-multi-thread"] }
 twilight-model = "0.13"
 
+[dependencies.serde_json]
+version = "1"
+default-features = false
+features = ["alloc"]
+
 [profile.release]
 lto = true
 strip = true
