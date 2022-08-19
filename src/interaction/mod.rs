@@ -59,20 +59,13 @@ fn on_app_command(data: CommandData) -> error::Result<InteractionResponse> {
             _ => return Err(error::Error::InvalidArgs),
         };
 
-        let num = if let CommandOptionValue::Number(num) = value {
-            num.round()
+        let num = if let CommandOptionValue::Integer(num) = value {
+            num
         } else {
             return Err(error::Error::Fatal);
         };
 
-        if num.is_nan() || num.is_infinite() {
-            return Err(error::Error::InvalidArgs);
-        }
-
-        // SAFETY: We have verified above that the number
-        // is neither `NaN`, infinite, or non-integral.
-        let val = unsafe { num.to_int_unchecked() };
-        if setter(&mut parsed, val).is_err() {
+        if setter(&mut parsed, num).is_err() {
             return Err(error::Error::InvalidArgs);
         }
     }
