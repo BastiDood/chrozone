@@ -37,18 +37,21 @@ fn on_app_command(data: CommandData) -> error::Result<InteractionResponse> {
 
     // Parse each argument
     for CommandDataOption { name, value } in data.options {
-        log::info!("Received argument {name} as {value:?}");
+        log::info!("Received argument {name} as {value:?}.");
         let setter = match name.as_str() {
             "timezone" => {
                 let text = if let CommandOptionValue::String(text) = value {
                     text.into_boxed_str()
                 } else {
+                    log::error!("Non-string command option value encountered for timezone.");
                     return Err(error::Error::Fatal);
                 };
-                tz = if let Ok(timezone) = text.parse::<chrono_tz::Tz>() {
-                    timezone
-                } else {
-                    return Err(error::Error::UnknownTimezone);
+                tz = match text.parse::<chrono_tz::Tz>() {
+                    Ok(timezone) => timezone,
+                    Err(err) => {
+                        log::error!("Failed to set timezone: {err}.");
+                        return Err(error::Error::UnknownTimezone);
+                    }
                 };
                 continue;
             }
@@ -58,7 +61,10 @@ fn on_app_command(data: CommandData) -> error::Result<InteractionResponse> {
             "hour" => Parsed::set_hour,
             "minute" => Parsed::set_minute,
             "secs" => Parsed::set_second,
-            _ => return Err(error::Error::InvalidArgs),
+            other => {
+                log::error!("Unable to parse command name {other}.");
+                return Err(error::Error::InvalidArgs)
+            },
         };
 
         let num = if let CommandOptionValue::Integer(num) = value {
@@ -69,7 +75,7 @@ fn on_app_command(data: CommandData) -> error::Result<InteractionResponse> {
         };
 
         if let Err(err) = setter(&mut parsed, num) {
-            log::error!("Failed to set {num} to parser: {err}");
+            log::error!("Failed to set {num} to parser: {err}.");
             return Err(error::Error::InvalidArgs);
         }
     }
@@ -77,7 +83,7 @@ fn on_app_command(data: CommandData) -> error::Result<InteractionResponse> {
     let timestamp = match parsed.to_datetime_with_timezone(&tz) {
         Ok(datetime) => datetime.timestamp(),
         Err(err) => {
-            log::error!("Failed to create date-time: {err}");
+            log::error!("Failed to create date-time: {err}.");
             return Err(error::Error::InvalidArgs);
         }
     };
