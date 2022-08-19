@@ -1,12 +1,96 @@
 mod error;
 
+use chrono::Timelike;
 use twilight_model::{
     application::interaction::{application_command::CommandData, Interaction},
     http::interaction::InteractionResponse,
 };
 
+fn create_parsed_from_now() -> chrono::format::ParseResult<chrono::format::Parsed> {
+    let now = chrono::Local::now();
+
+    use chrono::Datelike;
+    let mut parsed = chrono::format::Parsed::new();
+    parsed.set_year(now.year().into())?;
+    parsed.set_month(now.month().into())?;
+    parsed.set_day(now.day().into())?;
+    parsed.set_hour(now.hour().into())?;
+    parsed.set_second(now.second().into())?;
+
+    Ok(parsed)
+}
+
 fn on_app_command(data: CommandData) -> error::Result<InteractionResponse> {
-    todo!()
+    use alloc::string::ToString;
+    use chrono::format::Parsed;
+    use twilight_model::{
+        application::interaction::application_command::{CommandDataOption, CommandOptionValue},
+        channel::message::MessageFlags,
+        http::interaction::{InteractionResponseData, InteractionResponseType::ChannelMessageWithSource},
+    };
+
+    // TODO: Verify command ID.
+
+    // Set default epoch arguments
+    let mut tz = chrono_tz::Tz::UTC;
+    let mut parsed = create_parsed_from_now().unwrap();
+
+    // Parse each argument
+    for CommandDataOption { name, value } in data.options {
+        let setter = match name.as_str() {
+            "timezone" => {
+                let text = if let CommandOptionValue::String(text) = value {
+                    text.into_boxed_str()
+                } else {
+                    return Err(error::Error::Fatal);
+                };
+                tz = if let Ok(timezone) = text.parse::<chrono_tz::Tz>() {
+                    timezone
+                } else {
+                    return Err(error::Error::UnknownTimezone);
+                };
+                continue;
+            }
+            "year" => Parsed::set_year,
+            "month" => Parsed::set_month,
+            "day" => Parsed::set_day,
+            "hour" => Parsed::set_hour,
+            "secs" => Parsed::set_second,
+            _ => return Err(error::Error::InvalidArgs),
+        };
+
+        let num = if let CommandOptionValue::Number(num) = value {
+            num.round()
+        } else {
+            return Err(error::Error::Fatal);
+        };
+
+        if num.is_nan() || num.is_infinite() {
+            return Err(error::Error::InvalidArgs);
+        }
+
+        // SAFETY: We have verified above that the number
+        // is neither `NaN`, infinite, or non-integral.
+        let val = unsafe { num.to_int_unchecked() };
+        if setter(&mut parsed, val).is_err() {
+            return Err(error::Error::InvalidArgs);
+        }
+    }
+
+    let timestamp = if let Ok(datetime) = parsed.to_datetime_with_timezone(&tz) {
+        datetime.timestamp()
+    } else {
+        return Err(error::Error::InvalidArgs);
+    };
+
+    Ok(InteractionResponse {
+        kind: ChannelMessageWithSource,
+        data: Some(InteractionResponseData {
+            content: Some(timestamp.to_string()),
+            flags: Some(MessageFlags::EPHEMERAL),
+            ..Default::default()
+        }),
+    })
 }
 
 fn on_autocomplete(data: CommandData) -> InteractionResponse {
@@ -18,6 +102,8 @@ fn on_autocomplete(data: CommandData) -> InteractionResponse {
         },
         http::interaction::{InteractionResponseData, InteractionResponseType::ChannelMessageWithSource},
     };
+
+    // TODO: Verify command ID.
 
     let choices = data
         .options
