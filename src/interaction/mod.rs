@@ -55,6 +55,7 @@ fn on_app_command(data: CommandData) -> error::Result<InteractionResponse> {
             "month" => Parsed::set_month,
             "day" => Parsed::set_day,
             "hour" => Parsed::set_hour,
+            "minute" => Parsed::set_minute,
             "secs" => Parsed::set_second,
             _ => return Err(error::Error::InvalidArgs),
         };
