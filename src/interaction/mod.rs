@@ -68,17 +68,18 @@ fn on_app_command(data: CommandData) -> error::Result<InteractionResponse> {
             return Err(error::Error::Fatal);
         };
 
-        if setter(&mut parsed, num).is_err() {
-            log::error!("Failed to set {num} to parser.");
+        if let Err(err) = setter(&mut parsed, num) {
+            log::error!("Failed to set {num} to parser: {err}");
             return Err(error::Error::InvalidArgs);
         }
     }
 
-    let timestamp = if let Ok(datetime) = parsed.to_datetime_with_timezone(&tz) {
-        datetime.timestamp()
-    } else {
-        log::error!("Failed to create date-time instance.");
-        return Err(error::Error::InvalidArgs);
+    let timestamp = match parsed.to_datetime_with_timezone(&tz) {
+        Ok(datetime) => datetime.timestamp(),
+        Err(err) => {
+            log::error!("Failed to create date-time: {err}");
+            return Err(error::Error::InvalidArgs);
+        }
     };
 
     Ok(InteractionResponse {
