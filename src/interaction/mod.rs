@@ -33,10 +33,11 @@ fn on_app_command(data: CommandData) -> error::Result<InteractionResponse> {
 
     // Set default epoch arguments
     let mut tz = chrono_tz::Tz::UTC;
-    let mut parsed = create_parsed_from_now().unwrap();
+    let mut parsed = create_parsed_from_now().map_err(|_| error::Error::Fatal)?;
 
     // Parse each argument
     for CommandDataOption { name, value } in data.options {
+        log::info!("Received argument {name} as {value:?}");
         let setter = match name.as_str() {
             "timezone" => {
                 let text = if let CommandOptionValue::String(text) = value {
@@ -63,10 +64,12 @@ fn on_app_command(data: CommandData) -> error::Result<InteractionResponse> {
         let num = if let CommandOptionValue::Integer(num) = value {
             num
         } else {
+            log::error!("Incorrect command option value received.");
             return Err(error::Error::Fatal);
         };
 
         if setter(&mut parsed, num).is_err() {
+            log::error!("Failed to set {num} to parser.");
             return Err(error::Error::InvalidArgs);
         }
     }
@@ -74,6 +77,7 @@ fn on_app_command(data: CommandData) -> error::Result<InteractionResponse> {
     let timestamp = if let Ok(datetime) = parsed.to_datetime_with_timezone(&tz) {
         datetime.timestamp()
     } else {
+        log::error!("Failed to create date-time instance.");
         return Err(error::Error::InvalidArgs);
     };
 
@@ -110,12 +114,12 @@ fn on_autocomplete(data: CommandData) -> InteractionResponse {
         .unwrap_or_default()
         .into_iter()
         .take(25)
-        .map(|tz| CommandOptionChoice::String {
-            name: alloc::string::String::from("timezone"),
-            name_localizations: None,
-            value: tz.to_owned(),
+        .map(|tz| {
+            let choice = tz.to_owned();
+            CommandOptionChoice::String { name: choice.clone(), name_localizations: None, value: choice }
         })
         .collect();
+    log::info!("Generated autocompletions: {:?}", choices);
 
     InteractionResponse {
         kind: ApplicationCommandAutocompleteResult,
@@ -135,16 +139,31 @@ fn try_respond(interaction: Interaction) -> error::Result<InteractionResponse> {
     let is_comm = match interaction.kind {
         ApplicationCommand => true,
         ApplicationCommandAutocomplete => false,
-        Ping => return Ok(InteractionResponse { kind: Pong, data: None }),
-        _ => return Err(error::Error::UnsupportedInteractionType),
+        Ping => {
+            log::info!("Received a ping.");
+            return Ok(InteractionResponse { kind: Pong, data: None });
+        }
+        _ => {
+            log::error!("Received unsupported interaction type.");
+            return Err(error::Error::UnsupportedInteractionType);
+        }
     };
 
     let data = match interaction.data.ok_or(error::Error::MissingPayload)? {
         InteractionData::ApplicationCommand(data) => *data,
-        _ => return Err(error::Error::Fatal),
+        _ => {
+            log::error!("Missing payload from application command invocation.");
+            return Err(error::Error::Fatal);
+        }
     };
 
-    Ok(if is_comm { on_app_command(data)? } else { on_autocomplete(data) })
+    Ok(if is_comm {
+        log::info!("Received application command.");
+        on_app_command(data)?
+    } else {
+        log::info!("Received autocompletion request.");
+        on_autocomplete(data)
+    })
 }
 
 pub fn respond(interaction: Interaction) -> InteractionResponse {

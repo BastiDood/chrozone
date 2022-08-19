@@ -12,8 +12,8 @@ fn main() -> anyhow::Result<()> {
     use ring::signature;
     let pub_key = signature::UnparsedPublicKey::new(&signature::ED25519, pub_bytes);
 
-    // Start up the asynchronous runtime
     let listener = net::TcpListener::bind((net::Ipv4Addr::UNSPECIFIED, port))?;
+
     let runtime = tokio::runtime::Builder::new_multi_thread().enable_io().build()?;
     let tcp = {
         let _guard = runtime.enter();
@@ -24,6 +24,8 @@ fn main() -> anyhow::Result<()> {
     let arc_pub_key = std::sync::Arc::new(pub_key);
     let mut http = hyper::server::conn::Http::new();
     http.http1_only(true);
+
+    env_logger::init();
     runtime.block_on(async {
         loop {
             let (stream, _) = match tcp.accept().await {

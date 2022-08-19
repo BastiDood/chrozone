@@ -24,10 +24,12 @@ where
     B: AsRef<[u8]>,
 {
     if method != Method::POST {
+        log::error!("Rejected non-POST request.");
         return Err(StatusCode::METHOD_NOT_ALLOWED);
     }
 
     if path != "/discord" {
+        log::error!("Rejected invalid path request.");
         return Err(StatusCode::NOT_FOUND);
     }
 
@@ -36,20 +38,24 @@ where
     let maybe_time = headers.get("X-Signature-Timestamp");
     let (sig, timestamp) = maybe_sig.zip(maybe_time).ok_or(StatusCode::UNAUTHORIZED)?;
     let signature = hex::decode(sig).map_err(|_| StatusCode::BAD_REQUEST)?;
+    log::debug!("Timestamp and signature retrieved.");
 
     // Append body after the timestamp
     let payload = hyper::body::to_bytes(body).await.map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
     let mut message = timestamp.as_bytes().to_vec();
     message.extend_from_slice(&payload);
+    log::debug!("Fully received payload body.");
 
     // Validate the challenge
     pub_key.verify(&message, &signature).map_err(|_| StatusCode::UNAUTHORIZED)?;
     drop(message);
     drop(signature);
+    log::debug!("Ed25519 signature verified.");
 
     // Parse incoming interaction
     let interaction = serde_json::from_slice(&payload).map_err(|_| StatusCode::BAD_REQUEST)?;
     drop(payload);
+    log::debug!("Interaction JSON body parsed.");
 
     let reply = interaction::respond(interaction);
     let body = serde_json::to_string(&reply).map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?.into();

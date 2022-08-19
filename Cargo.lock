@@ -94,8 +94,10 @@ dependencies = [
  "anyhow",
  "chrono",
  "chrono-tz",
+ "env_logger",
  "hex",
  "hyper",
+ "log",
  "ring",
  "serde_json",
  "strsim",
@@ -108,6 +110,15 @@ name = "core-foundation-sys"
 version = "0.8.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "5827cebf4670468b8772dd191856768aedcb1b0278a04f989f7766351917b9dc"
+
+[[package]]
+name = "env_logger"
+version = "0.9.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "0b2cf0344971ee6c64c31be0d530793fba457d322dfec2810c453d0ef228f9c3"
+dependencies = [
+ "log",
+]
 
 [[package]]
 name = "fnv"
