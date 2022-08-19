@@ -94,7 +94,7 @@ fn on_autocomplete(data: CommandData) -> InteractionResponse {
             command::{CommandOptionChoice, CommandOptionType},
             interaction::application_command::{CommandDataOption, CommandOptionValue::Focused},
         },
-        http::interaction::{InteractionResponseData, InteractionResponseType::ChannelMessageWithSource},
+        http::interaction::{InteractionResponseData, InteractionResponseType::ApplicationCommandAutocompleteResult},
     };
 
     // TODO: Verify command ID.
@@ -118,7 +118,7 @@ fn on_autocomplete(data: CommandData) -> InteractionResponse {
         .collect();
 
     InteractionResponse {
-        kind: ChannelMessageWithSource,
+        kind: ApplicationCommandAutocompleteResult,
         data: Some(InteractionResponseData { choices: Some(choices), ..Default::default() }),
     }
 }
