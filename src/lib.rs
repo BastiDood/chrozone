@@ -2,6 +2,7 @@
 extern crate alloc;
 
 mod interaction;
+mod util;
 
 use hyper::{Body, HeaderMap, Method, Response, StatusCode};
 use ring::signature::UnparsedPublicKey;
