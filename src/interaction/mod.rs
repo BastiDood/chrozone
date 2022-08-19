@@ -10,7 +10,37 @@ fn on_app_command(data: CommandData) -> error::Result<InteractionResponse> {
 }
 
 fn on_autocomplete(data: CommandData) -> InteractionResponse {
-    todo!()
+    use alloc::borrow::ToOwned;
+    use twilight_model::{
+        application::{
+            command::{CommandOptionChoice, CommandOptionType},
+            interaction::application_command::{CommandDataOption, CommandOptionValue::Focused},
+        },
+        http::interaction::{InteractionResponseData, InteractionResponseType::ChannelMessageWithSource},
+    };
+
+    let choices = data
+        .options
+        .into_iter()
+        .find_map(|CommandDataOption { name, value }| match (name.as_str(), value) {
+            ("timezone", Focused(comm, CommandOptionType::String)) => Some(comm.into_boxed_str()),
+            _ => None,
+        })
+        .map(|query| crate::util::autocomplete_tz(&query, 25))
+        .unwrap_or_default()
+        .into_iter()
+        .take(25)
+        .map(|tz| CommandOptionChoice::String {
+            name: alloc::string::String::from("timezone"),
+            name_localizations: None,
+            value: tz.to_owned(),
+        })
+        .collect();
+
+    InteractionResponse {
+        kind: ChannelMessageWithSource,
+        data: Some(InteractionResponseData { choices: Some(choices), ..Default::default() }),
+    }
 }
 
 fn try_respond(interaction: Interaction) -> error::Result<InteractionResponse> {
