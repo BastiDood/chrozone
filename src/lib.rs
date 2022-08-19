@@ -53,5 +53,9 @@ where
 
     let reply = interaction::respond(interaction);
     let body = serde_json::to_string(&reply).map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?.into();
-    Ok(Response::new(body))
+
+    use hyper::header::{CONTENT_TYPE, HeaderValue};
+    let mut res = Response::new(body);
+    res.headers_mut().append(CONTENT_TYPE, HeaderValue::from_static("application/json"));
+    Ok(res)
 }
