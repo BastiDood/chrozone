@@ -1,0 +1,17 @@
+[package]
+name = "chrozone"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+anyhow = "1"
+chrono = { version = "0.4", default-features = false }
+hex = "0.4"
+hyper = { version = "0.14", features = ["http1", "server"] }
+ring = { version = "0.16", default-features = false }
+tokio = { version = "1.20", features = ["net", "rt-multi-thread"] }
+twilight-model = "0.13"
+
+[profile.release]
+lto = true
+strip = true
