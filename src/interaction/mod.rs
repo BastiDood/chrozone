@@ -1,28 +1,13 @@
 mod error;
 
-use chrono::Timelike;
 use twilight_model::{
     application::interaction::{application_command::CommandData, Interaction},
     http::interaction::InteractionResponse,
 };
 
-fn create_parsed_from_now() -> chrono::format::ParseResult<chrono::format::Parsed> {
-    let now = chrono::Local::now();
-
-    use chrono::Datelike;
-    let mut parsed = chrono::format::Parsed::new();
-    parsed.set_year(now.year().into())?;
-    parsed.set_month(now.month().into())?;
-    parsed.set_day(now.day().into())?;
-    parsed.set_hour(now.hour().into())?;
-    parsed.set_second(now.second().into())?;
-
-    Ok(parsed)
-}
-
 fn on_app_command(data: CommandData) -> error::Result<InteractionResponse> {
     use alloc::string::ToString;
-    use chrono::format::Parsed;
+    use chrono::{offset::LocalResult, TimeZone};
     use twilight_model::{
         application::interaction::application_command::{CommandDataOption, CommandOptionValue},
         channel::message::MessageFlags,
@@ -33,39 +18,33 @@ fn on_app_command(data: CommandData) -> error::Result<InteractionResponse> {
 
     // Set default epoch arguments
     let mut tz = chrono_tz::Tz::UTC;
-    let mut parsed = create_parsed_from_now().map_err(|_| error::Error::Fatal)?;
+    let mut year = None;
+    let mut month = 1;
+    let mut day = 1;
+    let mut hour = 0;
+    let mut minute = 0;
+    let mut second = 0;
 
     // Parse each argument
     for CommandDataOption { name, value } in data.options {
         log::info!("Received argument {name} as {value:?}.");
-        let setter = match name.as_str() {
-            "timezone" => {
-                let text = if let CommandOptionValue::String(text) = value {
-                    text.into_boxed_str()
-                } else {
-                    log::error!("Non-string command option value encountered for timezone.");
-                    return Err(error::Error::Fatal);
-                };
-                tz = match text.parse::<chrono_tz::Tz>() {
-                    Ok(timezone) => timezone,
-                    Err(err) => {
-                        log::error!("Failed to set timezone: {err}.");
-                        return Err(error::Error::UnknownTimezone);
-                    }
-                };
-                continue;
-            }
-            "year" => Parsed::set_year,
-            "month" => Parsed::set_month,
-            "day" => Parsed::set_day,
-            "hour" => Parsed::set_hour,
-            "minute" => Parsed::set_minute,
-            "secs" => Parsed::set_second,
-            other => {
-                log::error!("Unable to parse command name {other}.");
-                return Err(error::Error::InvalidArgs)
-            },
-        };
+
+        if name.as_str() == "timezone" {
+            let text = if let CommandOptionValue::String(text) = value {
+                text.into_boxed_str()
+            } else {
+                log::error!("Non-string command option value encountered for timezone.");
+                return Err(error::Error::Fatal);
+            };
+            tz = match text.parse::<chrono_tz::Tz>() {
+                Ok(timezone) => timezone,
+                Err(err) => {
+                    log::error!("Failed to set timezone: {err}.");
+                    return Err(error::Error::UnknownTimezone);
+                }
+            };
+            continue;
+        }
 
         let num = if let CommandOptionValue::Integer(num) = value {
             num
@@ -74,20 +53,51 @@ fn on_app_command(data: CommandData) -> error::Result<InteractionResponse> {
             return Err(error::Error::Fatal);
         };
 
-        if let Err(err) = setter(&mut parsed, num) {
-            log::error!("Failed to set {num} to parser: {err}.");
-            return Err(error::Error::InvalidArgs);
-        }
+        let target = match name.as_str() {
+            "year" => {
+                year = Some(match i32::try_from(num) {
+                    Ok(val) => val,
+                    Err(err) => {
+                        log::error!("Integer argument is out of range: {err}.");
+                        return Err(error::Error::InvalidArgs);
+                    }
+                });
+                continue;
+            }
+            "month" => &mut month,
+            "day" => &mut day,
+            "hour" => &mut hour,
+            "minute" => &mut minute,
+            "secs" => &mut second,
+            other => {
+                log::error!("Unable to parse command name {other}.");
+                return Err(error::Error::InvalidArgs);
+            }
+        };
+
+        *target = match u32::try_from(num) {
+            Ok(val) => val,
+            Err(err) => {
+                log::error!("Integer argument is out of range: {err}.");
+                return Err(error::Error::InvalidArgs);
+            }
+        };
     }
 
-    let timestamp = match parsed.to_datetime_with_timezone(&tz) {
-        Ok(datetime) => datetime.timestamp(),
-        Err(err) => {
-            log::error!("Failed to create date-time: {err}.");
+    let year = year.ok_or(error::Error::InvalidArgs)?;
+    let date = match tz.ymd_opt(year, month, day) {
+        LocalResult::Single(date) => date,
+        LocalResult::None => {
+            log::error!("Unable to create date instance.");
+            return Err(error::Error::InvalidArgs);
+        }
+        LocalResult::Ambiguous(..) => {
+            log::error!("Ambiguous local time requested.");
             return Err(error::Error::InvalidArgs);
         }
     };
 
+    let timestamp = date.and_hms(hour, minute, second).timestamp();
     Ok(InteractionResponse {
         kind: ChannelMessageWithSource,
         data: Some(InteractionResponseData {

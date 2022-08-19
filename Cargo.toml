@@ -5,6 +5,7 @@ edition = "2021"
 
 [dependencies]
 anyhow = "1"
+chrono = { version = "0.4", default-features = false }
 chrono-tz = { version = "0.6", default-features = false }
 env_logger = { version = "0.9", default-features = false }
 hex = "0.4"
@@ -14,11 +15,6 @@ ring = { version = "0.16", default-features = false }
 strsim = "0.10"
 tokio = { version = "1.20", features = ["net", "rt-multi-thread"] }
 twilight-model = "0.13"
-
-[dependencies.chrono]
-version = "0.4"
-default-features = false
-features = ["clock"]
 
 [dependencies.serde_json]
 version = "1"
