@@ -7,9 +7,8 @@
 pub fn autocomplete_tz(query: &str, count: usize) -> alloc::vec::Vec<&'static str> {
     let mut names = chrono_tz::TZ_VARIANTS.map(chrono_tz::Tz::name).to_vec();
     names.select_nth_unstable_by(count, move |&a, &b| {
-        use strsim::jaro_winkler;
-        let first = jaro_winkler(query, a);
-        let second = jaro_winkler(query, b);
+        let first = strsim::sorensen_dice(query, a);
+        let second = strsim::sorensen_dice(query, b);
         second.total_cmp(&first)
     });
     names
@@ -19,7 +18,7 @@ pub fn autocomplete_tz(query: &str, count: usize) -> alloc::vec::Vec<&'static st
 mod tests {
     #[test]
     fn autocomplete_queries() {
-        let names = super::autocomplete_tz("Asia/Ma", 3);
-        assert_eq!(&names[..3], &["Asia/Macao", "Asia/Macau", "Asia/Manila"]);
+        let names = super::autocomplete_tz("Asia/Ma", 5);
+        assert_eq!(&names[..5], &["Asia/Macao", "Asia/Manila", "Asia/Magadan", "Asia/Macau", "Asia/Makassar"]);
     }
 }
