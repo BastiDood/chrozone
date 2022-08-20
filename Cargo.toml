@@ -12,7 +12,7 @@ hex = "0.4"
 hyper = { version = "0.14", features = ["http1", "server"] }
 log = "0.4"
 ring = { version = "0.16", default-features = false }
-strsim = "0.10"
+sublime_fuzzy = "0.7"
 tokio = { version = "1.20", features = ["net", "rt-multi-thread"] }
 twilight-model = "0.13"
 
