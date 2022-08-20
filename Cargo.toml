@@ -8,6 +8,7 @@ anyhow = "1"
 chrono = { version = "0.4", default-features = false }
 chrono-tz = { version = "0.6", default-features = false }
 env_logger = { version = "0.9", default-features = false }
+hashbrown = "0.12"
 hex = "0.4"
 hyper = { version = "0.14", features = ["http1", "server"] }
 log = "0.4"

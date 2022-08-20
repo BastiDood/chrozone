@@ -1,5 +1,6 @@
 mod error;
 
+use alloc::string::ToString;
 use twilight_model::{
     application::interaction::{application_command::CommandData, Interaction},
     http::interaction::InteractionResponse,
@@ -131,6 +132,7 @@ fn on_autocomplete(data: CommandData) -> InteractionResponse {
         .into_iter()
         .take(25)
         .map(|tz| {
+            use alloc::borrow::ToOwned;
             let choice = tz.to_owned();
             CommandOptionChoice::String { name: choice.clone(), name_localizations: None, value: choice }
         })
