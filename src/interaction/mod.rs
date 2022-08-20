@@ -53,17 +53,18 @@ fn on_app_command(data: CommandData) -> error::Result<InteractionResponse> {
             return Err(error::Error::Fatal);
         };
 
+        if name.as_str() == "year" {
+            year = Some(match i32::try_from(num) {
+                Ok(val) => val,
+                Err(err) => {
+                    log::error!("Integer argument is out of range: {err}.");
+                    return Err(error::Error::InvalidArgs);
+                }
+            });
+            continue;
+        }
+
         let target = match name.as_str() {
-            "year" => {
-                year = Some(match i32::try_from(num) {
-                    Ok(val) => val,
-                    Err(err) => {
-                        log::error!("Integer argument is out of range: {err}.");
-                        return Err(error::Error::InvalidArgs);
-                    }
-                });
-                continue;
-            }
             "month" => &mut month,
             "day" => &mut day,
             "hour" => &mut hour,
