@@ -6,7 +6,6 @@ use twilight_model::{
 };
 
 fn on_app_command(data: CommandData) -> error::Result<InteractionResponse> {
-    use alloc::string::ToString;
     use chrono::{offset::LocalResult, TimeZone};
     use twilight_model::{
         application::interaction::application_command::{CommandDataOption, CommandOptionValue},
@@ -110,7 +109,6 @@ fn on_app_command(data: CommandData) -> error::Result<InteractionResponse> {
 }
 
 fn on_autocomplete(data: CommandData) -> InteractionResponse {
-    use alloc::borrow::ToOwned;
     use twilight_model::{
         application::{
             command::{CommandOptionChoice, CommandOptionType},
@@ -186,7 +184,6 @@ fn try_respond(interaction: Interaction) -> error::Result<InteractionResponse> {
 
 pub fn respond(interaction: Interaction) -> InteractionResponse {
     try_respond(interaction).unwrap_or_else(|err| {
-        use alloc::string::ToString;
         use twilight_model::{
             channel::message::MessageFlags,
             http::interaction::{InteractionResponseData, InteractionResponseType::ChannelMessageWithSource},
