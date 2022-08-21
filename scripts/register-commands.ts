@@ -18,8 +18,12 @@ const response = await fetch(endpoint, {
     },
     body: JSON.stringify([
         {
+            name: 'help',
+            description: 'Summon the help menu.',
+        },
+        {
             name: 'epoch',
-            description: 'Get the Unix timestamp from a date.',
+            description: 'Get the ISO-8601 timestamp from a date and timezone.',
             options: [
                 {
                     type: 3,
