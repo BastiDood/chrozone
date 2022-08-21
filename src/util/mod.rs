@@ -1,3 +1,5 @@
+pub mod float;
+
 /// Compares a `query` string to a list of supported IANA timezones. The return value
 /// is a vector of string slices, where the first `count` elements are an (unspecified)
 /// ordering of the top `count` autocompletion results.
@@ -13,10 +15,9 @@ pub fn autocomplete_tz(query: &str, count: usize) -> alloc::vec::Vec<&'static st
 
     loop {
         // Partition the haystack according to the current index
-        let (left, _, right) = haystack.select_nth_unstable_by(index, |&a, &b| {
-            let first = *cache.entry(a).or_insert_with(|| strsim::jaro_winkler(query, a));
-            let second = *cache.entry(b).or_insert_with(|| strsim::jaro_winkler(query, b));
-            second.total_cmp(&first)
+        let (left, _, right) = haystack.select_nth_unstable_by_key(index, |&tz| {
+            let score = *cache.entry(tz).or_insert_with(|| strsim::jaro_winkler(query, tz));
+            core::cmp::Reverse(float::TotalDouble(score))
         });
 
         // Reduce the search space
@@ -30,10 +31,9 @@ pub fn autocomplete_tz(query: &str, count: usize) -> alloc::vec::Vec<&'static st
     }
 
     // Partially sort the top `count` items
-    names[..count].sort_unstable_by(|&a, &b| {
-        let first = *cache.entry(a).or_insert_with(|| strsim::jaro_winkler(query, a));
-        let second = *cache.entry(b).or_insert_with(|| strsim::jaro_winkler(query, b));
-        second.total_cmp(&first)
+    names[..count].sort_unstable_by_key(|&tz| {
+        let score = *cache.entry(tz).or_insert_with(|| strsim::jaro_winkler(query, tz));
+        core::cmp::Reverse(float::TotalDouble(score))
     });
 
     names
