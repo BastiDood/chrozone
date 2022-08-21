@@ -1,25 +1,14 @@
 # Chrozone
 Chrozone is a Discord bot which provides epoch- and other time-related utilities via slash commands.
 
-# Building
-Chrozone is written in [Rust]. It uses the built-in [Cargo] package manager to build the project and its dependencies.
-
-```bash
-# Assuming that the Rust toolchain has been properly installed,
-# this command builds the server and stores the artifacts in
-# the `target/release/` folder (by default).
-cargo build --release
-```
+# Running the Bot
+Chrozone is written in [Rust]. It uses the built-in [Cargo] package manager to build the project and its dependencies. Some automation scripts are also written in TypeScript, which requires the [Deno] runtime. Before proceeding, please ensure that the appropriate toolchains have been installed.
 
 [Rust]: https://www.rust-lang.org
 [Cargo]: https://doc.rust-lang.org/cargo
-
-# Running the Bot
-First and foremost, we must register Chrozone's available slash commands. A dedicated [Deno] script automates this process for us.
-
 [Deno]: https://deno.land
 
-To invoke the script, the host must provide some credentials (obtained from the [Discord Developer Portal]) via the environment variables below.
+We must now register Chrozone's available slash commands. A dedicated [Deno] script automates this process for us. To invoke the script, the host must provide some credentials (obtained from the [Discord Developer Portal]) via the environment variables below.
 
 Required? | Name | Category | Description
 :-------: | ---- | -------- | -----------
