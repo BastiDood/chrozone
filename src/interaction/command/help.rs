@@ -24,27 +24,27 @@ fn epoch() -> Embed {
             EmbedField {
                 inline: false,
                 name: String::from("`month`"),
-                value: String::from("Must be a value from `1` to `12`, where `1` is January and `12` is December."),
+                value: String::from("Must be a value from `1` (default) to `12`, where `1` is January and `12` is December."),
             },
             EmbedField {
                 inline: false,
                 name: String::from("`day`"),
-                value: String::from("Must be a value from `1` to `31`. Note that the days `29` to `31` are only invalid for certain months."),
+                value: String::from("Must be a value from `1` (default) to `31`. Note that the days `29` to `31` are only invalid for certain months."),
             },
             EmbedField {
                 inline: false,
                 name: String::from("`hour`"),
-                value: String::from("Must be a value from `0` to `23` (i.e. 24-hour format), where `0` is `12am` and `23` is `11pm`"),
+                value: String::from("Must be a value from `0` (default) to `23` (i.e. 24-hour format), where `0` is `12am` and `23` is `11pm`"),
             },
             EmbedField {
                 inline: false,
                 name: String::from("`minute`"),
-                value: String::from("Must be a value from `0` to `59`."),
+                value: String::from("Must be a value from `0` (default) to `59`."),
             },
             EmbedField {
                 inline: false,
                 name: String::from("`second`"),
-                value: String::from("Must be a value from `0` to `60`. The 60th second accounts for possible leap seconds."),
+                value: String::from("Must be a value from `0` (default) to `60`. The 60th second accounts for possible leap seconds."),
             },
         ]),
         footer: None,
