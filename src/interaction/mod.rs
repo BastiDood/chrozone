@@ -1,167 +1,24 @@
+mod command;
 mod error;
 
-use alloc::string::ToString;
 use twilight_model::{
     application::interaction::{application_command::CommandData, Interaction},
     http::interaction::InteractionResponse,
 };
 
-/// Handler for the `/epoch` command.
-fn on_epoch_command(data: CommandData) -> error::Result<InteractionResponse> {
-    use chrono::{offset::LocalResult, TimeZone};
-    use twilight_model::{
-        application::interaction::application_command::{CommandDataOption, CommandOptionValue},
-        channel::message::MessageFlags,
-        http::interaction::{InteractionResponseData, InteractionResponseType::ChannelMessageWithSource},
-    };
-
-    // Set default epoch arguments
-    let mut tz = chrono_tz::Tz::UTC;
-    let mut year = None;
-    let mut month = 1;
-    let mut day = 1;
-    let mut hour = 0;
-    let mut minute = 0;
-    let mut second = 0;
-
-    // Parse each argument
-    for CommandDataOption { name, value } in data.options {
-        log::info!("Received argument {name} as {value:?}.");
-
-        if name.as_str() == "timezone" {
-            let text = if let CommandOptionValue::String(text) = value {
-                text.into_boxed_str()
-            } else {
-                log::error!("Non-string command option value encountered for timezone.");
-                return Err(error::Error::Fatal);
-            };
-            tz = match text.parse::<chrono_tz::Tz>() {
-                Ok(timezone) => timezone,
-                Err(err) => {
-                    log::error!("Failed to set timezone: {err}.");
-                    return Err(error::Error::UnknownTimezone);
-                }
-            };
-            continue;
-        }
-
-        let num = if let CommandOptionValue::Integer(num) = value {
-            num
-        } else {
-            log::error!("Incorrect command option value received.");
-            return Err(error::Error::Fatal);
-        };
-
-        if name.as_str() == "year" {
-            year = Some(match i32::try_from(num) {
-                Ok(val) => val,
-                Err(err) => {
-                    log::error!("Integer argument is out of range: {err}.");
-                    return Err(error::Error::InvalidArgs);
-                }
-            });
-            continue;
-        }
-
-        let target = match name.as_str() {
-            "month" => &mut month,
-            "day" => &mut day,
-            "hour" => &mut hour,
-            "minute" => &mut minute,
-            "secs" => &mut second,
-            other => {
-                log::error!("Unable to parse command name {other}.");
-                return Err(error::Error::InvalidArgs);
-            }
-        };
-
-        *target = match u32::try_from(num) {
-            Ok(val) => val,
-            Err(err) => {
-                log::error!("Integer argument is out of range: {err}.");
-                return Err(error::Error::InvalidArgs);
-            }
-        };
-    }
-
-    let year = year.ok_or(error::Error::InvalidArgs)?;
-    let date = match tz.ymd_opt(year, month, day) {
-        LocalResult::Single(date) => date,
-        LocalResult::None => {
-            log::error!("Unable to create date instance.");
-            return Err(error::Error::InvalidArgs);
-        }
-        LocalResult::Ambiguous(..) => {
-            log::error!("Ambiguous local time requested.");
-            return Err(error::Error::InvalidArgs);
-        }
-    };
-
-    let msg = date.and_hms(hour, minute, second).timestamp().to_string();
-    Ok(InteractionResponse {
-        kind: ChannelMessageWithSource,
-        data: Some(InteractionResponseData {
-            content: Some(msg),
-            flags: Some(MessageFlags::EPHEMERAL),
-            ..Default::default()
-        }),
-    })
-}
-
-/// Handler for the `/help` command.
-fn on_help_command() -> InteractionResponse {
-    use alloc::{string::String, vec::Vec};
-    use twilight_model::{
-        channel::{
-            embed::{Embed, EmbedField},
-            message::MessageFlags,
-        },
-        http::interaction::{InteractionResponseData, InteractionResponseType::ChannelMessageWithSource},
-    };
-
-    let fields = Vec::from([
-        EmbedField { inline: false, name: String::from("`/help`"), value: String::from("Summon this help menu.") },
-        EmbedField {
-            inline: false,
-            name: String::from("`/epoch timezone year [month] [day] [hour] [min] [sec]`"),
-            value: String::from(
-                "Get the ISO-8601 timestamp (in seconds) for some date and timezone. Autocompletions enabled.",
-            ),
-        },
-    ]);
-
-    InteractionResponse {
-        kind: ChannelMessageWithSource,
-        data: Some(InteractionResponseData {
-            embeds: Some(Vec::from([Embed {
-                author: None,
-                color: Some(0xE5AE16),
-                description: Some(String::from("List of supported commands and their arguments.")),
-                fields,
-                footer: None,
-                image: None,
-                kind: String::from("rich"),
-                provider: None,
-                thumbnail: None,
-                timestamp: None,
-                title: Some(String::from("Chrozone Help")),
-                url: None,
-                video: None,
-            }])),
-            flags: Some(MessageFlags::EPHEMERAL),
-            ..Default::default()
-        }),
-    }
-}
-
 /// Router for the various command handlers.
 fn on_app_command(data: CommandData) -> error::Result<InteractionResponse> {
+    use twilight_model::http::interaction::InteractionResponseType::ChannelMessageWithSource;
+
     // TODO: Verify command ID.
-    match data.name.as_str() {
-        "epoch" => on_epoch_command(data),
-        "help" => Ok(on_help_command()),
-        _ => Err(error::Error::UnknownCommand),
-    }
+    let execute = match data.name.as_str() {
+        "epoch" => command::epoch::execute,
+        "help" => command::help::execute,
+        _ => return Err(error::Error::UnknownCommand),
+    };
+
+    let payload = execute(data)?;
+    Ok(InteractionResponse { kind: ChannelMessageWithSource, data: Some(payload) })
 }
 
 fn on_autocomplete(data: CommandData) -> Option<InteractionResponse> {
@@ -243,6 +100,7 @@ fn try_respond(interaction: Interaction) -> error::Result<InteractionResponse> {
 
 pub fn respond(interaction: Interaction) -> InteractionResponse {
     try_respond(interaction).unwrap_or_else(|err| {
+        use alloc::string::ToString;
         use twilight_model::{
             channel::message::MessageFlags,
             http::interaction::{InteractionResponseData, InteractionResponseType::ChannelMessageWithSource},
