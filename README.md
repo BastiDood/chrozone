@@ -45,8 +45,10 @@ Required? | Name | Category | Description
 :-------: | ---- | -------- | -----------
 &#x2714; | `PORT` | Network | Configures the port at which we will bind the server's TCP socket.
 &#x2714; | `PUB_KEY` | Discord | Sets the public key of the bot.[^portal] Must contain 64 hexadecimal characters. Used for validating webhooks from Discord.
-&#x274c; | `EPOCH_ID` | Bot | Sets the expected ID for the `/epoch` command.
-&#x274c; | `HELP_ID` | Bot | Sets the expected ID for the `/help` command.
+&#x274c; | `EPOCH_ID` | Bot | Sets the expected ID for the `/epoch` command.[^id]
+&#x274c; | `HELP_ID` | Bot | Sets the expected ID for the `/help` command.[^id]
+
+[^id]: May be retrieved from the command registration script's output.
 
 ```bash
 # Set required environment variables.
