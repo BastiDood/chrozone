@@ -6,6 +6,7 @@ use twilight_model::{
     http::interaction::InteractionResponse,
 };
 
+/// Handler for the `/epoch` command.
 fn on_epoch_command(data: CommandData) -> error::Result<InteractionResponse> {
     use chrono::{offset::LocalResult, TimeZone};
     use twilight_model::{
@@ -107,11 +108,58 @@ fn on_epoch_command(data: CommandData) -> error::Result<InteractionResponse> {
     })
 }
 
+/// Handler for the `/help` command.
+fn on_help_command() -> InteractionResponse {
+    use alloc::{string::String, vec::Vec};
+    use twilight_model::{
+        channel::{
+            embed::{Embed, EmbedField},
+            message::MessageFlags,
+        },
+        http::interaction::{InteractionResponseData, InteractionResponseType::ChannelMessageWithSource},
+    };
+
+    let fields = Vec::from([
+        EmbedField { inline: false, name: String::from("`/help`"), value: String::from("Summon this help menu.") },
+        EmbedField {
+            inline: false,
+            name: String::from("`/epoch timezone year [month] [day] [hour] [min] [sec]`"),
+            value: String::from(
+                "Get the ISO-8601 timestamp (in seconds) for some date and timezone. Autocompletions enabled.",
+            ),
+        },
+    ]);
+
+    InteractionResponse {
+        kind: ChannelMessageWithSource,
+        data: Some(InteractionResponseData {
+            embeds: Some(Vec::from([Embed {
+                author: None,
+                color: Some(0xE5AE16),
+                description: Some(String::from("List of supported commands and their arguments.")),
+                fields,
+                footer: None,
+                image: None,
+                kind: String::from("rich"),
+                provider: None,
+                thumbnail: None,
+                timestamp: None,
+                title: Some(String::from("Chrozone Help")),
+                url: None,
+                video: None,
+            }])),
+            flags: Some(MessageFlags::EPHEMERAL),
+            ..Default::default()
+        }),
+    }
+}
+
+/// Router for the various command handlers.
 fn on_app_command(data: CommandData) -> error::Result<InteractionResponse> {
     // TODO: Verify command ID.
     match data.name.as_str() {
         "epoch" => on_epoch_command(data),
-        "help" => todo!(),
+        "help" => Ok(on_help_command()),
         _ => Err(error::Error::UnknownCommand),
     }
 }
