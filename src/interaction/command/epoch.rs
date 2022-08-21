@@ -23,7 +23,7 @@ pub fn execute(data: CommandData) -> error::Result<InteractionResponseData> {
 
     // Parse each argument
     for CommandDataOption { name, value } in data.options {
-        log::info!("Received argument {name} as {value:?}.");
+        log::info!("Received argument [{name}] as [{value:?}].");
 
         if name.as_str() == "timezone" {
             let text = if let CommandOptionValue::String(text) = value {
