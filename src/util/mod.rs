@@ -1,3 +1,5 @@
+use alloc::vec::Vec;
+
 pub mod float;
 
 /// Compares a `query` string to a list of supported IANA timezones. The return value
@@ -6,7 +8,7 @@ pub mod float;
 ///
 /// # Panic
 /// Panics if `count` is greater than or equal to the length of [`TZ_VARIANTS`](chrono_tz::TZ_VARIANTS).
-pub fn autocomplete_tz(query: &str, count: usize) -> alloc::vec::Vec<&'static str> {
+pub fn autocomplete_tz(query: &str, count: usize) -> Vec<&'static str> {
     let mut names = chrono_tz::TZ_VARIANTS.map(chrono_tz::Tz::name).to_vec();
     let mut cache = hashbrown::HashMap::with_capacity(32);
 

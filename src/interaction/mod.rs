@@ -6,15 +6,13 @@ use twilight_model::{
     http::interaction::InteractionResponse,
 };
 
-fn on_app_command(data: CommandData) -> error::Result<InteractionResponse> {
+fn on_epoch_command(data: CommandData) -> error::Result<InteractionResponse> {
     use chrono::{offset::LocalResult, TimeZone};
     use twilight_model::{
         application::interaction::application_command::{CommandDataOption, CommandOptionValue},
         channel::message::MessageFlags,
         http::interaction::{InteractionResponseData, InteractionResponseType::ChannelMessageWithSource},
     };
-
-    // TODO: Verify command ID.
 
     // Set default epoch arguments
     let mut tz = chrono_tz::Tz::UTC;
@@ -98,18 +96,27 @@ fn on_app_command(data: CommandData) -> error::Result<InteractionResponse> {
         }
     };
 
-    let timestamp = date.and_hms(hour, minute, second).timestamp();
+    let msg = date.and_hms(hour, minute, second).timestamp().to_string();
     Ok(InteractionResponse {
         kind: ChannelMessageWithSource,
         data: Some(InteractionResponseData {
-            content: Some(timestamp.to_string()),
+            content: Some(msg),
             flags: Some(MessageFlags::EPHEMERAL),
             ..Default::default()
         }),
     })
 }
 
-fn on_autocomplete(data: CommandData) -> InteractionResponse {
+fn on_app_command(data: CommandData) -> error::Result<InteractionResponse> {
+    // TODO: Verify command ID.
+    match data.name.as_str() {
+        "epoch" => on_epoch_command(data),
+        "help" => todo!(),
+        _ => Err(error::Error::UnknownCommand),
+    }
+}
+
+fn on_autocomplete(data: CommandData) -> Option<InteractionResponse> {
     use twilight_model::{
         application::{
             command::{CommandOptionChoice, CommandOptionType},
@@ -118,7 +125,9 @@ fn on_autocomplete(data: CommandData) -> InteractionResponse {
         http::interaction::{InteractionResponseData, InteractionResponseType::ApplicationCommandAutocompleteResult},
     };
 
-    // TODO: Verify command ID.
+    if data.name.as_str() != "epoch" {
+        return None;
+    }
 
     let choices = data
         .options
@@ -139,10 +148,10 @@ fn on_autocomplete(data: CommandData) -> InteractionResponse {
         .collect();
     log::info!("Generated autocompletions: {:?}", choices);
 
-    InteractionResponse {
+    Some(InteractionResponse {
         kind: ApplicationCommandAutocompleteResult,
         data: Some(InteractionResponseData { choices: Some(choices), ..Default::default() }),
-    }
+    })
 }
 
 fn try_respond(interaction: Interaction) -> error::Result<InteractionResponse> {
@@ -175,13 +184,13 @@ fn try_respond(interaction: Interaction) -> error::Result<InteractionResponse> {
         }
     };
 
-    Ok(if is_comm {
+    if is_comm {
         log::info!("Received application command.");
-        on_app_command(data)?
+        on_app_command(data)
     } else {
         log::info!("Received autocompletion request.");
-        on_autocomplete(data)
-    })
+        on_autocomplete(data).ok_or(error::Error::UnknownCommand)
+    }
 }
 
 pub fn respond(interaction: Interaction) -> InteractionResponse {
