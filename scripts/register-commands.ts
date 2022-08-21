@@ -20,6 +20,17 @@ const response = await fetch(endpoint, {
         {
             name: 'help',
             description: 'Summon the help menu.',
+            options: [
+                {
+                    type: 3,
+                    name: 'command',
+                    description: 'Ask for more details for a specific command.',
+                    choices: [
+                        { name: '/epoch', value: 'epoch' },
+                        { name: '/help', value: 'help' },
+                    ],
+                },
+            ],
         },
         {
             name: 'epoch',
