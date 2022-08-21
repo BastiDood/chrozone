@@ -22,7 +22,7 @@ First and foremost, we must register Chrozone's available slash commands. A dedi
 To invoke the script, the host must provide some credentials (obtained from the [Discord Developer Portal]) via the environment variables below.
 
 Required? | Name | Category | Description
---------- | ---- | -------- | -----------
+:-------: | ---- | -------- | -----------
 &#x2714; | `APP_ID` | Discord | Sets the application ID to be used for authentication with the Discord API. [^portal]
 &#x2714; | `TOKEN` | Discord | Sets the bot token to be used for authentication with the Discord API.[^portal]
 &#x274c; | `GUILD_ID` | Discord | Sets whether we must register as guild commands (if present) or global commands (otherwise).
@@ -42,7 +42,7 @@ deno run --allow-net --allow-env scripts/register-commands.ts
 Once the commands have been registered, the executable then expects additional environment variables to be present before it initializes the server.
 
 Required? | Name | Category | Description
---------- | ---- | -------- | -----------
+:-------: | ---- | -------- | -----------
 &#x2714; | `PORT` | Network | Configures the port at which we will bind the server's TCP socket.
 &#x2714; | `PUB_KEY` | Discord | Sets the public key of the bot.[^portal] Must contain 64 hexadecimal characters. Used for validating webhooks from Discord.
 &#x274c; | `EPOCH_ID` | Bot | Sets the expected ID for the `/epoch` command.
