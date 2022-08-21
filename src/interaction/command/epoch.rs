@@ -13,7 +13,7 @@ pub fn execute(data: CommandData) -> error::Result<InteractionResponseData> {
     };
 
     // Set default epoch arguments
-    let mut tz = chrono_tz::Tz::UTC;
+    let mut tz = None;
     let mut year = None;
     let mut month = 1;
     let mut day = 1;
@@ -32,13 +32,13 @@ pub fn execute(data: CommandData) -> error::Result<InteractionResponseData> {
                 log::error!("Non-string command option value encountered for timezone.");
                 return Err(error::Error::Fatal);
             };
-            tz = match text.parse::<chrono_tz::Tz>() {
+            tz = Some(match text.parse::<chrono_tz::Tz>() {
                 Ok(timezone) => timezone,
                 Err(err) => {
                     log::error!("Failed to set timezone: {err}.");
                     return Err(error::Error::UnknownTimezone);
                 }
-            };
+            });
             continue;
         }
 
@@ -81,7 +81,7 @@ pub fn execute(data: CommandData) -> error::Result<InteractionResponseData> {
         };
     }
 
-    let year = year.ok_or(error::Error::InvalidArgs)?;
+    let (tz, year) = tz.zip(year).ok_or(error::Error::InvalidArgs)?;
     let date = match tz.ymd_opt(year, month, day) {
         LocalResult::Single(date) => date,
         LocalResult::None => {
