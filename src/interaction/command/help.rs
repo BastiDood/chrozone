@@ -1,4 +1,3 @@
-use super::error;
 use alloc::{string::String, vec::Vec};
 use twilight_model::{
     application::interaction::application_command::CommandData, channel::embed::Embed, channel::embed::EmbedField,
@@ -118,7 +117,7 @@ fn default() -> Embed {
     }
 }
 
-pub fn execute(mut data: CommandData) -> error::Result<InteractionResponseData> {
+pub fn execute(mut data: CommandData) -> Option<InteractionResponseData> {
     use twilight_model::{
         application::interaction::application_command::{CommandDataOption, CommandOptionValue},
         channel::message::MessageFlags,
@@ -128,12 +127,12 @@ pub fn execute(mut data: CommandData) -> error::Result<InteractionResponseData> 
         Some(CommandDataOption { value: CommandOptionValue::String(val), .. }) => match val.as_str() {
             "epoch" => epoch,
             "help" => help,
-            _ => return Err(error::Error::UnknownCommand),
+            _ => return None,
         },
         _ => default,
     };
 
-    Ok(InteractionResponseData {
+    Some(InteractionResponseData {
         embeds: Some(Vec::from([get_embed()])),
         flags: Some(MessageFlags::EPHEMERAL),
         ..Default::default()

@@ -11,13 +11,15 @@ fn on_app_command(data: CommandData) -> error::Result<InteractionResponse> {
     use twilight_model::http::interaction::InteractionResponseType::ChannelMessageWithSource;
 
     // TODO: Verify command ID.
-    let execute = match data.name.as_str() {
-        "epoch" => command::epoch::execute,
-        "help" => command::help::execute,
-        _ => return Err(error::Error::UnknownCommand),
-    };
+    let payload = match data.name.as_str() {
+        "epoch" => command::epoch::execute(data),
+        "help" => command::help::execute(data).ok_or(error::Error::UnknownCommand),
+        other => {
+            log::error!("Invoked unknown /{other} command.");
+            return Err(error::Error::UnknownCommand);
+        }
+    }?;
 
-    let payload = execute(data)?;
     Ok(InteractionResponse { kind: ChannelMessageWithSource, data: Some(payload) })
 }
 
@@ -76,8 +78,8 @@ fn try_respond(interaction: Interaction) -> error::Result<InteractionResponse> {
             log::info!("Received a ping.");
             return Ok(InteractionResponse { kind: Pong, data: None });
         }
-        _ => {
-            log::error!("Received unsupported interaction type.");
+        other => {
+            log::error!("Received unsupported interaction type {other:?}.");
             return Err(error::Error::UnsupportedInteractionType);
         }
     };
