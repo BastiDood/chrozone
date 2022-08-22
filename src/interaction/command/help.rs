@@ -46,6 +46,11 @@ fn epoch() -> Embed {
                 name: String::from("`second`"),
                 value: String::from("Must be a value from `0` (default) to `60`. The 60th second accounts for possible leap seconds."),
             },
+            EmbedField {
+                inline: false,
+                name: String::from("`preview`"),
+                value: String::from("Enables preview mode for all timestamp formatting options. Defaults to `false`."),
+            },
         ]),
         footer: None,
         image: None,
