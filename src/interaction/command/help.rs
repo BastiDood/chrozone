@@ -128,7 +128,7 @@ pub fn execute(mut data: CommandData) -> error::Result<InteractionResponseData> 
         Some(CommandDataOption { value: CommandOptionValue::String(val), .. }) => match val.as_str() {
             "epoch" => epoch,
             "help" => help,
-            _ => return Err(error::Error::Fatal),
+            _ => return Err(error::Error::UnknownCommand),
         },
         _ => default,
     };

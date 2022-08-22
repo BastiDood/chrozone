@@ -72,7 +72,7 @@ pub fn execute(data: CommandData) -> error::Result<InteractionResponseData> {
                 Ok(val) => val,
                 Err(err) => {
                     log::error!("Integer argument is out of range: {err}.");
-                    return Err(error::Error::InvalidArgs);
+                    return Err(error::Error::OutOfRange);
                 }
             });
             continue;
@@ -93,13 +93,13 @@ pub fn execute(data: CommandData) -> error::Result<InteractionResponseData> {
         *target = match u32::try_from(num) {
             Ok(val) => val,
             Err(err) => {
-                log::error!("Integer argument is out of range: {err}.");
-                return Err(error::Error::InvalidArgs);
+                log::error!("Unsigned integer argument is out of range: {err}.");
+                return Err(error::Error::OutOfRange);
             }
         };
     }
 
-    let (tz, year) = tz.zip(year).ok_or(error::Error::InvalidArgs)?;
+    let (tz, year) = tz.zip(year).ok_or(error::Error::MissingRequired)?;
     let date = match tz.ymd_opt(year, month, day) {
         LocalResult::Single(date) => date,
         LocalResult::None => {
@@ -108,7 +108,7 @@ pub fn execute(data: CommandData) -> error::Result<InteractionResponseData> {
         }
         LocalResult::Ambiguous(..) => {
             log::error!("Ambiguous local time requested.");
-            return Err(error::Error::InvalidArgs);
+            return Err(error::Error::AmbiguousTime);
         }
     };
 
