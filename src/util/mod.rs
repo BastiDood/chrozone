@@ -1,6 +1,21 @@
 use alloc::vec::Vec;
+use core::{char::ToLowercase, iter::FlatMap, str::Chars};
 
 pub mod float;
+
+struct CharWrapper<'a>(&'a str);
+
+impl<'a> IntoIterator for &'a CharWrapper<'a> {
+    type IntoIter = FlatMap<Chars<'a>, ToLowercase, fn(char) -> ToLowercase>;
+    type Item = char;
+    fn into_iter(self) -> Self::IntoIter {
+        self.0.chars().flat_map(char::to_lowercase)
+    }
+}
+
+fn compute_score(a: &str, b: &str) -> f64 {
+    strsim::generic_jaro_winkler(&CharWrapper(a), &CharWrapper(b))
+}
 
 /// Compares a `query` string to a list of supported IANA timezones. The return value
 /// is a vector of string slices, where the first `count` elements are an (unspecified)
@@ -18,7 +33,7 @@ pub fn autocomplete_tz(query: &str, count: usize) -> Vec<&'static str> {
     loop {
         // Partition the haystack according to the current index
         let (left, _, right) = haystack.select_nth_unstable_by_key(index, |&tz| {
-            let score = *cache.entry(tz).or_insert_with(|| strsim::jaro_winkler(query, tz));
+            let score = *cache.entry(tz).or_insert_with(|| compute_score(query, tz));
             core::cmp::Reverse(float::TotalDouble(score))
         });
 
@@ -34,7 +49,7 @@ pub fn autocomplete_tz(query: &str, count: usize) -> Vec<&'static str> {
 
     // Partially sort the top `count` items
     names[..count].sort_unstable_by_key(|&tz| {
-        let score = *cache.entry(tz).or_insert_with(|| strsim::jaro_winkler(query, tz));
+        let score = *cache.entry(tz).or_insert_with(|| compute_score(query, tz));
         core::cmp::Reverse(float::TotalDouble(score))
     });
 
