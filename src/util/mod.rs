@@ -1,7 +1,7 @@
+pub mod float;
+
 use alloc::vec::Vec;
 use core::{char::ToLowercase, iter::FlatMap, str::Chars};
-
-pub mod float;
 
 struct CharWrapper<'a>(&'a str);
 
