@@ -39,7 +39,7 @@ const response = await fetch(endpoint, {
                 {
                     type: 3,
                     name: 'timezone',
-                    description: 'The timezone to base the date from. Autocompletions are enabled.',
+                    description: 'The timezone to base the date from. Autocompletions enabled.',
                     required: true,
                     autocomplete: true,
                     min_value: 1,
@@ -85,6 +85,11 @@ const response = await fetch(endpoint, {
                     description: 'Sets the second (defaults to 0).',
                     min_value: 0,
                     max_value: 60,
+                },
+                {
+                    type: 5,
+                    name: 'preview',
+                    description: 'Enables preview mode for all timestamp formatting options. Disabled by default.',
                 },
             ],
         },
