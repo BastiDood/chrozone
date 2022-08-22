@@ -116,8 +116,7 @@ pub fn execute(data: CommandData) -> error::Result<InteractionResponseData> {
     Ok(if preview {
         InteractionResponseData {
             embeds: Some(Vec::from([Embed {
-                author: None,
-                color: Some(0xE5AE16),
+                title: Some(String::from("Timestamp Preview")),
                 description: Some(String::from("Here are the possible ways to format your timestamp.")),
                 fields: Vec::from([
                     {
@@ -149,15 +148,7 @@ pub fn execute(data: CommandData) -> error::Result<InteractionResponseData> {
                         EmbedField { inline: false, name: format!("Relative (`{value}`)"), value }
                     },
                 ]),
-                footer: None,
-                image: None,
-                kind: String::from("rich"),
-                provider: None,
-                thumbnail: None,
-                timestamp: None,
-                title: Some(String::from("Timestamp Preview")),
-                url: None,
-                video: None,
+                ..super::embed::base()
             }])),
             flags: Some(MessageFlags::EPHEMERAL),
             ..Default::default()

@@ -1,4 +1,5 @@
 mod command;
+mod embed;
 mod error;
 
 use twilight_model::{

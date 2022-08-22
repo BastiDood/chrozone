@@ -6,8 +6,7 @@ use twilight_model::{
 
 fn epoch() -> Embed {
     Embed {
-        author: None,
-        color: Some(0xE5AE16),
+        title: Some(String::from("`/epoch` Command")),
         description: Some(String::from("Generates the ISO-8601 timestamp at a given date and timezone.")),
         fields: Vec::from([
             EmbedField {
@@ -51,22 +50,13 @@ fn epoch() -> Embed {
                 value: String::from("Enables preview mode for all timestamp formatting options. Defaults to `false`."),
             },
         ]),
-        footer: None,
-        image: None,
-        kind: String::from("rich"),
-        provider: None,
-        thumbnail: None,
-        timestamp: None,
-        title: Some(String::from("`/epoch` Command")),
-        url: None,
-        video: None,
+        ..super::embed::base()
     }
 }
 
 fn help() -> Embed {
     Embed {
-        author: None,
-        color: Some(0xE5AE16),
+        title: Some(String::from("`/help` Command")),
         description: Some(String::from("Provides extra details for specific commands.")),
         fields: Vec::from([
             EmbedField {
@@ -80,22 +70,13 @@ fn help() -> Embed {
                 value: String::from("Provides extra details on how to use the `/help` command."),
             },
         ]),
-        footer: None,
-        image: None,
-        kind: String::from("rich"),
-        provider: None,
-        thumbnail: None,
-        timestamp: None,
-        title: Some(String::from("`/help` Command")),
-        url: None,
-        video: None,
+        ..super::embed::base()
     }
 }
 
 fn default() -> Embed {
     Embed {
-        author: None,
-        color: Some(0xE5AE16),
+        title: Some(String::from("Chrozone Help")),
         description: Some(String::from("List of supported commands and their arguments.")),
         fields: Vec::from([
             EmbedField { inline: false, name: String::from("`/help`"), value: String::from("Summon this help menu.") },
@@ -105,15 +86,7 @@ fn default() -> Embed {
                 value: String::from("Get the ISO-8601 timestamp (in seconds) for some date and timezone."),
             },
         ]),
-        footer: None,
-        image: None,
-        kind: String::from("rich"),
-        provider: None,
-        thumbnail: None,
-        timestamp: None,
-        title: Some(String::from("Chrozone Help")),
-        url: None,
-        video: None,
+        ..super::embed::base()
     }
 }
 
