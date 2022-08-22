@@ -18,9 +18,7 @@ impl fmt::Display for Error {
             Self::InvalidArgs => "Invalid command arguments.",
             Self::MissingPayload => "No interaction data present.",
             Self::UnknownCommand => "Unknown command name.",
-            Self::UnknownTimezone => {
-                "Unknown timezone. Please ensure that it is registered in the IANA time zone database."
-            }
+            Self::UnknownTimezone => "Unknown timezone. Please ensure that it is in the IANA Time Zone Database.",
             Self::UnsupportedInteractionType => "Unsupported interaction type.",
         })
     }

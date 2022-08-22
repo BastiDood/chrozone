@@ -5,11 +5,18 @@ use twilight_model::{
 
 /// Handler for the `/epoch` command.
 pub fn execute(data: CommandData) -> error::Result<InteractionResponseData> {
-    use alloc::string::ToString;
+    use alloc::{
+        format,
+        string::{String, ToString},
+        vec::Vec,
+    };
     use chrono::{offset::LocalResult, TimeZone};
     use twilight_model::{
         application::interaction::application_command::{CommandDataOption, CommandOptionValue},
-        channel::message::MessageFlags,
+        channel::{
+            embed::{Embed, EmbedField},
+            message::MessageFlags,
+        },
     };
 
     // Set default epoch arguments
@@ -20,10 +27,11 @@ pub fn execute(data: CommandData) -> error::Result<InteractionResponseData> {
     let mut hour = 0;
     let mut minute = 0;
     let mut second = 0;
+    let mut preview = false;
 
     // Parse each argument
     for CommandDataOption { name, value } in data.options {
-        log::info!("Received argument [{name}] as [{value:?}].");
+        log::info!("Received argument [{name}] as {value:?}.");
 
         if name.as_str() == "timezone" {
             let text = if let CommandOptionValue::String(text) = value {
@@ -39,6 +47,16 @@ pub fn execute(data: CommandData) -> error::Result<InteractionResponseData> {
                     return Err(error::Error::UnknownTimezone);
                 }
             });
+            continue;
+        }
+
+        if name.as_str() == "preview" {
+            preview = if let CommandOptionValue::Boolean(preview) = value {
+                preview
+            } else {
+                log::error!("Non-boolean command option value encountered for preview.");
+                return Err(error::Error::Fatal);
+            };
             continue;
         }
 
@@ -94,9 +112,61 @@ pub fn execute(data: CommandData) -> error::Result<InteractionResponseData> {
         }
     };
 
-    Ok(InteractionResponseData {
-        content: Some(date.and_hms(hour, minute, second).timestamp().to_string()),
-        flags: Some(MessageFlags::EPHEMERAL),
-        ..Default::default()
+    let timestamp = date.and_hms(hour, minute, second).timestamp();
+    Ok(if preview {
+        InteractionResponseData {
+            embeds: Some(Vec::from([Embed {
+                author: None,
+                color: Some(0xE5AE16),
+                description: Some(String::from("Here are the possible ways to format your timestamp.")),
+                fields: Vec::from([
+                    {
+                        let value = format!("<t:{timestamp}:t>");
+                        EmbedField { inline: false, name: format!("Short Time (`{value}`)"), value }
+                    },
+                    {
+                        let value = format!("<t:{timestamp}:T>");
+                        EmbedField { inline: false, name: format!("Long Time (`{value}`)"), value }
+                    },
+                    {
+                        let value = format!("<t:{timestamp}:d>");
+                        EmbedField { inline: false, name: format!("Short Date (`{value}`)"), value }
+                    },
+                    {
+                        let value = format!("<t:{timestamp}:D>");
+                        EmbedField { inline: false, name: format!("Long Date (`{value}`)"), value }
+                    },
+                    {
+                        let value = format!("<t:{timestamp}:f>");
+                        EmbedField { inline: false, name: format!("Short Full Date + Time (`{value}`)"), value }
+                    },
+                    {
+                        let value = format!("<t:{timestamp}:F>");
+                        EmbedField { inline: false, name: format!("Long Full Date + Time (`{value}`)"), value }
+                    },
+                    {
+                        let value = format!("<t:{timestamp}:R>");
+                        EmbedField { inline: false, name: format!("Relative (`{value}`)"), value }
+                    },
+                ]),
+                footer: None,
+                image: None,
+                kind: String::from("rich"),
+                provider: None,
+                thumbnail: None,
+                timestamp: None,
+                title: Some(String::from("Timestamp Preview")),
+                url: None,
+                video: None,
+            }])),
+            flags: Some(MessageFlags::EPHEMERAL),
+            ..Default::default()
+        }
+    } else {
+        InteractionResponseData {
+            content: Some(timestamp.to_string()),
+            flags: Some(MessageFlags::EPHEMERAL),
+            ..Default::default()
+        }
     })
 }
