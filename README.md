@@ -1,5 +1,9 @@
 # Chrozone
-Chrozone is a Discord bot which provides epoch- and other time-related utilities via slash commands.
+![Chrozone Logo](./docs/LOGO.png)
+
+Chrozone is a [Discord bot][invite] which provides epoch- and other time-related utilities via slash commands.
+
+[invite]: https://discord.com/api/oauth2/authorize?client_id=1008989318901137459&scope=applications.commands
 
 # Running the Bot
 Chrozone is written in [Rust]. It uses the built-in [Cargo] package manager to build the project and its dependencies. Some automation scripts are also written in TypeScript, which requires the [Deno] runtime. Before proceeding, please ensure that the appropriate toolchains have been installed.
