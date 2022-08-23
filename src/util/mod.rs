@@ -1,4 +1,5 @@
 pub mod float;
+pub mod sort;
 
 use alloc::vec::Vec;
 use core::{char::ToLowercase, iter::FlatMap, str::Chars};
@@ -24,33 +25,15 @@ fn compute_score(a: &str, b: &str) -> f64 {
 /// # Panic
 /// Panics if `count` is greater than or equal to the length of [`TZ_VARIANTS`](chrono_tz::TZ_VARIANTS).
 pub fn autocomplete_tz(query: &str, count: usize) -> Vec<&'static str> {
+    use core::cmp::Reverse;
+    use float::TotalDouble;
+
     let mut names = chrono_tz::TZ_VARIANTS.map(chrono_tz::Tz::name).to_vec();
     let mut cache = hashbrown::HashMap::with_capacity(32);
 
-    let mut haystack = names.as_mut_slice();
-    let mut index = count;
-
-    loop {
-        // Partition the haystack according to the current index
-        let (left, _, right) = haystack.select_nth_unstable_by_key(index, |&tz| {
-            let score = *cache.entry(tz).or_insert_with(|| compute_score(query, tz));
-            core::cmp::Reverse(float::TotalDouble(score))
-        });
-
-        // Reduce the search space
-        use core::cmp::Ordering::{Equal, Greater, Less};
-        let curr = left.len();
-        (haystack, index) = match curr.cmp(&index) {
-            Equal => break,
-            Less => (right, index - curr),
-            Greater => (left, index),
-        };
-    }
-
-    // Partially sort the top `count` items
-    names[..count].sort_unstable_by_key(|&tz| {
+    sort::top_n_by_key(&mut names, count, |&tz| {
         let score = *cache.entry(tz).or_insert_with(|| compute_score(query, tz));
-        core::cmp::Reverse(float::TotalDouble(score))
+        Reverse(TotalDouble(score))
     });
 
     names
