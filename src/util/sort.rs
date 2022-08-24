@@ -35,6 +35,8 @@ where
             Greater => (left, index),
         };
     }
+
+    items[..count].sort_unstable_by_key(&mut compare);
 }
 
 #[cfg(test)]
