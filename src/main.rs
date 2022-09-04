@@ -13,6 +13,7 @@ fn main() -> anyhow::Result<()> {
     let pub_key = signature::UnparsedPublicKey::new(&signature::ED25519, pub_bytes);
 
     let listener = net::TcpListener::bind((net::Ipv4Addr::UNSPECIFIED, port))?;
+    listener.set_nonblocking(true)?;
 
     let runtime = tokio::runtime::Builder::new_multi_thread().enable_io().build()?;
     let tcp = {
