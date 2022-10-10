@@ -24,12 +24,12 @@ where
     B: AsRef<[u8]>,
 {
     if method != Method::POST {
-        log::error!("Rejected non-POST request.");
+        log::error!("Rejected non-POST request: {method} {path}");
         return Err(StatusCode::METHOD_NOT_ALLOWED);
     }
 
     if path != "/discord" {
-        log::error!("Rejected invalid path request.");
+        log::error!("Rejected invalid path request: {path}");
         return Err(StatusCode::NOT_FOUND);
     }
 
