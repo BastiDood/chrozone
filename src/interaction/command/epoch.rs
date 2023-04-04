@@ -13,9 +13,9 @@ pub fn execute(data: CommandData) -> error::Result<InteractionResponseData> {
     use chrono::{offset::LocalResult, TimeZone};
     use twilight_model::{
         application::interaction::application_command::{CommandDataOption, CommandOptionValue},
-        channel::{
+        channel::message::{
             embed::{Embed, EmbedField},
-            message::MessageFlags,
+            MessageFlags,
         },
     };
 

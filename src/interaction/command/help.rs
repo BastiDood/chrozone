@@ -1,6 +1,7 @@
 use alloc::{string::String, vec::Vec};
 use twilight_model::{
-    application::interaction::application_command::CommandData, channel::embed::Embed, channel::embed::EmbedField,
+    application::interaction::application_command::CommandData,
+    channel::message::embed::{Embed, EmbedField},
     http::interaction::InteractionResponseData,
 };
 

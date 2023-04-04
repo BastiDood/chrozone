@@ -1,5 +1,5 @@
 use alloc::{string::String, vec::Vec};
-use twilight_model::channel::embed::Embed;
+use twilight_model::channel::message::embed::Embed;
 
 /// Base embed. Typically, only the `title`, `description`,
 /// and `fields` properties are overwritten.

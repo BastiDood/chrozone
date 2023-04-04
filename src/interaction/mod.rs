@@ -28,7 +28,7 @@ fn on_autocomplete(data: CommandData) -> Option<InteractionResponse> {
     use alloc::borrow::ToOwned;
     use twilight_model::{
         application::{
-            command::{CommandOptionChoice, CommandOptionType},
+            command::{CommandOptionChoice, CommandOptionChoiceValue, CommandOptionType},
             interaction::application_command::{CommandDataOption, CommandOptionValue::Focused},
         },
         http::interaction::{InteractionResponseData, InteractionResponseType::ApplicationCommandAutocompleteResult},
@@ -49,10 +49,10 @@ fn on_autocomplete(data: CommandData) -> Option<InteractionResponse> {
         .unwrap_or_default()
         .into_iter()
         .take(25)
-        .map(|tz| CommandOptionChoice::String {
+        .map(|tz| CommandOptionChoice {
             name: tz.replace('_', " "),
             name_localizations: None,
-            value: tz.to_owned(),
+            value: CommandOptionChoiceValue::String(tz.to_owned()),
         })
         .collect();
     log::info!("Generated autocompletions: {:?}", choices);
