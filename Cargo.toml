@@ -6,16 +6,16 @@ edition = "2021"
 [dependencies]
 anyhow = "1"
 chrono = { version = "0.4", default-features = false }
-chrono-tz = { version = "0.6", default-features = false }
-env_logger = { version = "0.9", default-features = false }
-hashbrown = "0.12"
+chrono-tz = { version = "0.8", default-features = false }
+env_logger = { version = "0.10", default-features = false }
+hashbrown = "0.13"
 hex = "0.4"
 hyper = { version = "0.14", features = ["http1", "server"] }
 log = "0.4"
 ring = { version = "0.16", default-features = false }
 strsim = "0.10"
-tokio = { version = "1.20", features = ["net", "rt-multi-thread"] }
-twilight-model = "0.13"
+tokio = { version = "1.27", features = ["net", "rt-multi-thread"] }
+twilight-model = "0.15"
 
 [dependencies.serde_json]
 version = "1"
