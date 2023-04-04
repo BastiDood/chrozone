@@ -100,8 +100,8 @@ pub fn execute(data: CommandData) -> error::Result<InteractionResponseData> {
     }
 
     let (tz, year) = tz.zip(year).ok_or(error::Error::MissingRequired)?;
-    let date = match tz.ymd_opt(year, month, day) {
-        LocalResult::Single(date) => date,
+    let timestamp = match tz.with_ymd_and_hms(year, month, day, hour, minute, second) {
+        LocalResult::Single(date) => date.timestamp(),
         LocalResult::None => {
             log::error!("Unable to create date instance.");
             return Err(error::Error::InvalidArgs);
@@ -112,7 +112,6 @@ pub fn execute(data: CommandData) -> error::Result<InteractionResponseData> {
         }
     };
 
-    let timestamp = date.and_hms(hour, minute, second).timestamp();
     Ok(if preview {
         InteractionResponseData {
             embeds: Some(Vec::from([Embed {
