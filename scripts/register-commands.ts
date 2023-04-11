@@ -81,7 +81,7 @@ const response = await fetch(endpoint, {
                 },
                 {
                     type: 4,
-                    name: 'second',
+                    name: 'secs',
                     description: 'Sets the second (defaults to 0).',
                     min_value: 0,
                     max_value: 60,
