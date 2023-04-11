@@ -38,7 +38,7 @@ fn on_autocomplete(data: CommandData) -> Option<InteractionResponse> {
         return None;
     }
 
-    let choices = data
+    let choices: alloc::vec::Vec<_> = data
         .options
         .into_iter()
         .find_map(|CommandDataOption { name, value }| match (name.as_str(), value) {
@@ -55,8 +55,8 @@ fn on_autocomplete(data: CommandData) -> Option<InteractionResponse> {
             value: CommandOptionChoiceValue::String(tz.to_owned()),
         })
         .collect();
-    log::info!("Generated autocompletions: {:?}", choices);
 
+    log::info!("Generated {} autocompletions", choices.len());
     Some(InteractionResponse {
         kind: ApplicationCommandAutocompleteResult,
         data: Some(InteractionResponseData { choices: Some(choices), ..Default::default() }),
