@@ -26,10 +26,11 @@ Required? | Name | Category | Description
 ```bash
 # Set required environment variables.
 APP_ID=
-TOKEN=
+BOT_TOKEN=
+GUILD_ID=
 
 # Ensure that the slash commands are registered beforehand.
-deno run --allow-net --allow-env scripts/register-commands.ts
+deno run --allow-net --allow-env scripts/commands.ts
 ```
 
 Once the commands have been registered, the executable then expects additional environment variables to be present before it initializes the server.
@@ -38,8 +39,6 @@ Required? | Name | Category | Description
 :-------: | ---- | -------- | -----------
 &#x2714; | `PORT` | Network | Configures the port at which we will bind the server's TCP socket.
 &#x2714; | `PUB_KEY` | Discord | Sets the public key of the bot.[^portal] Must contain 64 hexadecimal characters. Used for validating webhooks from Discord.
-&#x274c; | `EPOCH_ID` | Bot | Sets the expected ID for the `/epoch` command.[^id]
-&#x274c; | `HELP_ID` | Bot | Sets the expected ID for the `/help` command.[^id]
 
 [^id]: May be retrieved from the command registration script's output.
 
