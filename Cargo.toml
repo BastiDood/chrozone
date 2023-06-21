@@ -13,7 +13,7 @@ hex = "0.4"
 hyper = { version = "0.14", features = ["http1", "server"] }
 log = "0.4"
 ring = { version = "0.16", default-features = false }
-strsim = "0.10"
+textdistance = "1"
 tokio = { version = "1.27", features = ["net", "rt-multi-thread"] }
 twilight-model = "0.15"
 
