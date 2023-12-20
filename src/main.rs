@@ -23,15 +23,13 @@ fn main() -> anyhow::Result<()> {
 
     // Listen for new connections
     let arc_pub_key = std::sync::Arc::new(pub_key);
-    let mut http = hyper::server::conn::Http::new();
-    http.http1_only(true);
+    let http = hyper::server::conn::http1::Builder::new();
 
     env_logger::init();
     runtime.block_on(async {
         loop {
-            let (stream, _) = match tcp.accept().await {
-                Ok(pair) => pair,
-                _ => continue,
+            let Ok((stream, _)) = tcp.accept().await else {
+                continue;
             };
 
             let outer = arc_pub_key.clone();
@@ -46,7 +44,8 @@ fn main() -> anyhow::Result<()> {
                 }
             });
 
-            let fut = http.serve_connection(stream, service);
+            let io = hyper_util::rt::TokioIo::new(stream);
+            let fut = http.serve_connection(io, service);
             runtime.spawn(async move { fut.await.unwrap() });
         }
     });

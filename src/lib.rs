@@ -4,22 +4,26 @@ extern crate alloc;
 mod interaction;
 mod util;
 
-use hyper::{Body, HeaderMap, Method, Response, StatusCode};
+use http_body_util::Full;
+use hyper::{
+    body::{Bytes, Incoming},
+    HeaderMap, Method, Response, StatusCode,
+};
 use ring::signature::UnparsedPublicKey;
 
-pub fn from_err_status(code: StatusCode) -> Response<Body> {
-    let mut res = Response::new(Body::empty());
+pub fn from_err_status(code: StatusCode) -> Response<Full<Bytes>> {
+    let mut res = Response::new(Full::new(Bytes::new()));
     *res.status_mut() = code;
     res
 }
 
 pub async fn try_respond<B>(
-    body: Body,
+    mut body: Incoming,
     method: Method,
     path: &str,
     headers: &HeaderMap,
     pub_key: &UnparsedPublicKey<B>,
-) -> core::result::Result<Response<Body>, StatusCode>
+) -> core::result::Result<Response<Full<Bytes>>, StatusCode>
 where
     B: AsRef<[u8]>,
 {
@@ -27,7 +31,7 @@ where
         Method::GET => {
             if path == "/" {
                 log::info!("Health check pinged!");
-                Ok(Response::new(Body::empty()))
+                Ok(Response::new(Full::new(Bytes::new())))
             } else {
                 log::error!("Invalid health check path: {path}");
                 Err(StatusCode::NOT_FOUND)
@@ -47,20 +51,31 @@ where
             log::debug!("Timestamp and signature retrieved.");
 
             // Append body after the timestamp
-            let payload = hyper::body::to_bytes(body).await.map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
+            use http_body_util::BodyExt;
             let mut message = timestamp.as_bytes().to_vec();
-            message.extend_from_slice(&payload);
+            let start = message.len();
+            while let Some(frame) = body.frame().await {
+                let frame = match frame {
+                    Ok(frame) => frame,
+                    Err(err) => {
+                        log::error!("body stream prematurely ended: {err}");
+                        return Err(StatusCode::INTERNAL_SERVER_ERROR);
+                    }
+                };
+                if let Some(data) = frame.data_ref() {
+                    message.extend_from_slice(data);
+                }
+            }
             log::debug!("Fully received payload body.");
 
             // Validate the challenge
             pub_key.verify(&message, &signature).map_err(|_| StatusCode::UNAUTHORIZED)?;
-            drop(message);
             drop(signature);
             log::debug!("Ed25519 signature verified.");
 
             // Parse incoming interaction
-            let interaction = serde_json::from_slice(&payload).map_err(|_| StatusCode::BAD_REQUEST)?;
-            drop(payload);
+            let json = message.get(start..).ok_or(StatusCode::INTERNAL_SERVER_ERROR)?;
+            let interaction = serde_json::from_slice(&json).map_err(|_| StatusCode::BAD_REQUEST)?;
             log::debug!("Interaction JSON body parsed.");
 
             let reply = interaction::respond(interaction);
