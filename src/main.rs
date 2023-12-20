@@ -5,12 +5,10 @@ fn main() -> anyhow::Result<()> {
     let port: u16 = var("PORT")?.parse()?;
 
     // Retrieve the Ed25519 public key
-    let public = var("PUB_KEY")?;
+    let pub_key = var("PUB_KEY")?;
     let mut pub_bytes = [0; 32];
-    hex::decode_to_slice(public, &mut pub_bytes)?;
-
-    use ring::signature;
-    let pub_key = signature::UnparsedPublicKey::new(&signature::ED25519, pub_bytes);
+    hex::decode_to_slice(pub_key, &mut pub_bytes)?;
+    let pub_key = ed25519_dalek::VerifyingKey::from_bytes(&pub_bytes)?;
 
     let listener = net::TcpListener::bind((net::Ipv4Addr::UNSPECIFIED, port))?;
     listener.set_nonblocking(true)?;

@@ -9,7 +9,6 @@ use hyper::{
     body::{Bytes, Incoming},
     HeaderMap, Method, Response, StatusCode,
 };
-use ring::signature::UnparsedPublicKey;
 
 pub fn from_err_status(code: StatusCode) -> Response<Full<Bytes>> {
     let mut res = Response::new(Full::new(Bytes::new()));
@@ -17,16 +16,13 @@ pub fn from_err_status(code: StatusCode) -> Response<Full<Bytes>> {
     res
 }
 
-pub async fn try_respond<B>(
+pub async fn try_respond(
     mut body: Incoming,
     method: Method,
     path: &str,
     headers: &HeaderMap,
-    pub_key: &UnparsedPublicKey<B>,
-) -> core::result::Result<Response<Full<Bytes>>, StatusCode>
-where
-    B: AsRef<[u8]>,
-{
+    pub_key: &ed25519_dalek::VerifyingKey,
+) -> core::result::Result<Response<Full<Bytes>>, StatusCode> {
     match method {
         Method::GET => {
             if path == "/" {
@@ -44,10 +40,11 @@ where
             }
 
             // Retrieve security headers
-            let maybe_sig = headers.get("X-Signature-Ed25519");
-            let maybe_time = headers.get("X-Signature-Timestamp");
-            let (sig, timestamp) = maybe_sig.zip(maybe_time).ok_or(StatusCode::UNAUTHORIZED)?;
-            let signature = hex::decode(sig).map_err(|_| StatusCode::BAD_REQUEST)?;
+            let signature = headers.get("X-Signature-Ed25519");
+            let timestamp = headers.get("X-Signature-Timestamp");
+            let (signature, timestamp) = signature.zip(timestamp).ok_or(StatusCode::UNAUTHORIZED)?;
+            let signature = hex::decode(signature).map_err(|_| StatusCode::BAD_REQUEST)?;
+            let signature = ed25519_dalek::Signature::from_slice(&signature).map_err(|_| StatusCode::BAD_REQUEST)?;
             log::debug!("Timestamp and signature retrieved.");
 
             // Append body after the timestamp
@@ -69,8 +66,7 @@ where
             log::debug!("Fully received payload body.");
 
             // Validate the challenge
-            pub_key.verify(&message, &signature).map_err(|_| StatusCode::UNAUTHORIZED)?;
-            drop(signature);
+            pub_key.verify_strict(&message, &signature).map_err(|_| StatusCode::UNAUTHORIZED)?;
             log::debug!("Ed25519 signature verified.");
 
             // Parse incoming interaction
