@@ -75,7 +75,7 @@ where
 
             // Parse incoming interaction
             let json = message.get(start..).ok_or(StatusCode::INTERNAL_SERVER_ERROR)?;
-            let interaction = serde_json::from_slice(&json).map_err(|_| StatusCode::BAD_REQUEST)?;
+            let interaction = serde_json::from_slice(json).map_err(|_| StatusCode::BAD_REQUEST)?;
             log::debug!("Interaction JSON body parsed.");
 
             let reply = interaction::respond(interaction);
