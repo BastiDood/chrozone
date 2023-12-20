@@ -27,7 +27,7 @@ pub fn execute(data: CommandData) -> error::Result<InteractionResponseData> {
     let mut hour = 0;
     let mut minute = 0;
     let mut second = 0;
-    let mut preview = false;
+    let mut preview = true;
 
     // Parse each argument
     for CommandDataOption { name, value } in data.options {

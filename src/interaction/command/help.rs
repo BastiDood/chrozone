@@ -48,7 +48,7 @@ fn epoch() -> Embed {
             EmbedField {
                 inline: false,
                 name: String::from("`preview`"),
-                value: String::from("Enables preview mode for all timestamp formatting options. Defaults to `false`."),
+                value: String::from("Enables preview mode for all timestamp formatting options. Defaults to `true`."),
             },
         ]),
         ..super::embed::base()

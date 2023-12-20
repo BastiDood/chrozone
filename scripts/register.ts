@@ -103,7 +103,7 @@ const response = await fetch(endpoint, {
                 {
                     type: 5,
                     name: 'preview',
-                    description: 'Enables preview mode for all timestamp formatting options. Disabled by default.',
+                    description: 'Enables preview mode for all timestamp formatting options. Enabled by default.',
                 },
             ],
         },
