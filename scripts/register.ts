@@ -57,7 +57,7 @@ const response = await fetch(endpoint, {
                     description: 'Sets the month (defaults to January).',
                     min_value: 1,
                     max_value: 12,
-                    options: [
+                    choices: [
                         { name: 'January', value: 1 },
                         { name: 'February', value: 2 },
                         { name: 'March', value: 3 },
