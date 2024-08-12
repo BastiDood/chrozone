@@ -25,7 +25,7 @@ fn on_app_command(data: CommandData) -> error::Result<InteractionResponse> {
 }
 
 fn on_autocomplete(data: CommandData) -> Option<InteractionResponse> {
-    use alloc::borrow::ToOwned;
+    use std::borrow::ToOwned;
     use twilight_model::{
         application::{
             command::{CommandOptionChoice, CommandOptionChoiceValue, CommandOptionType},
@@ -38,7 +38,7 @@ fn on_autocomplete(data: CommandData) -> Option<InteractionResponse> {
         return None;
     }
 
-    let choices: alloc::vec::Vec<_> = data
+    let choices: Vec<_> = data
         .options
         .into_iter()
         .find_map(|CommandDataOption { name, value }| match (name.as_str(), value) {
@@ -104,7 +104,7 @@ fn try_respond(interaction: Interaction) -> error::Result<InteractionResponse> {
 
 pub fn respond(interaction: Interaction) -> InteractionResponse {
     try_respond(interaction).unwrap_or_else(|err| {
-        use alloc::string::ToString;
+        use std::string::ToString;
         use twilight_model::{
             channel::message::MessageFlags,
             http::interaction::{InteractionResponseData, InteractionResponseType::ChannelMessageWithSource},

@@ -5,12 +5,6 @@ use twilight_model::{
 
 /// Handler for the `/epoch` command.
 pub fn execute(data: CommandData) -> error::Result<InteractionResponseData> {
-    use alloc::{
-        format,
-        string::{String, ToString},
-        vec::Vec,
-    };
-    use chrono::{offset::LocalResult, TimeZone};
     use twilight_model::{
         application::interaction::application_command::{CommandDataOption, CommandOptionValue},
         channel::message::{
@@ -40,7 +34,7 @@ pub fn execute(data: CommandData) -> error::Result<InteractionResponseData> {
                 log::error!("Non-string command option value encountered for timezone.");
                 return Err(error::Error::Fatal);
             };
-            tz = Some(match text.parse::<chrono_tz::Tz>() {
+            tz = Some(match jiff::tz::TimeZone::get(&text) {
                 Ok(timezone) => timezone,
                 Err(err) => {
                     log::error!("Failed to set timezone: {err}.");
@@ -68,7 +62,7 @@ pub fn execute(data: CommandData) -> error::Result<InteractionResponseData> {
         };
 
         if name.as_str() == "year" {
-            year = Some(match i32::try_from(num) {
+            year = Some(match i16::try_from(num) {
                 Ok(val) => val,
                 Err(err) => {
                     log::error!("Integer argument is out of range: {err}.");
@@ -90,7 +84,7 @@ pub fn execute(data: CommandData) -> error::Result<InteractionResponseData> {
             }
         };
 
-        *target = match u32::try_from(num) {
+        *target = match i8::try_from(num) {
             Ok(val) => val,
             Err(err) => {
                 log::error!("Unsigned integer argument is out of range: {err}.");
@@ -100,15 +94,14 @@ pub fn execute(data: CommandData) -> error::Result<InteractionResponseData> {
     }
 
     let (tz, year) = tz.zip(year).ok_or(error::Error::MissingRequired)?;
-    let timestamp = match tz.with_ymd_and_hms(year, month, day, hour, minute, second) {
-        LocalResult::Single(date) => date.timestamp(),
-        LocalResult::None => {
-            log::error!("Unable to create date instance.");
+    let date = jiff::civil::Date::constant(year, month, day);
+    let time = jiff::civil::Time::constant(hour, minute, second, 0);
+    let datetime = jiff::civil::DateTime::from_parts(date, time);
+    let timestamp = match tz.to_zoned(datetime) {
+        Ok(zoned) => zoned.timestamp().as_second(),
+        Err(err) => {
+            log::error!("Timezone conversion failed: {err}.");
             return Err(error::Error::InvalidArgs);
-        }
-        LocalResult::Ambiguous(..) => {
-            log::error!("Ambiguous local time requested.");
-            return Err(error::Error::AmbiguousTime);
         }
     };
 
