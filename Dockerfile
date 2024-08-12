@@ -1,4 +1,4 @@
-FROM lukemathwalker/cargo-chef:0.1.67-rust-1.80.1-slim-bookworm as chef
+FROM lukemathwalker/cargo-chef:0.1.67-rust-1.80.1-alpine3.20 as chef
 WORKDIR /app
 
 FROM chef AS planner
@@ -11,7 +11,7 @@ RUN cargo chef cook --release --recipe-path recipe.json
 COPY . .
 RUN cargo build --locked --release
 
-FROM gcr.io/distroless/cc-debian12:nonroot-amd64
+FROM gcr.io/distroless/static-debian12:nonroot-amd64
 COPY --from=builder /app/target/release/chrozone /
 EXPOSE 3000
 ENV PORT="3000"
