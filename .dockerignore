@@ -1,0 +1,13 @@
+.dockerignore
+.env
+.git
+.gitignore
+
+Dockerfile
+LICENSE
+README.md
+rustfmt.toml
+
+docs
+scripts
+target
