@@ -25,7 +25,6 @@ fn on_app_command(data: CommandData) -> error::Result<InteractionResponse> {
 }
 
 fn on_autocomplete(data: CommandData) -> Option<InteractionResponse> {
-    use std::borrow::ToOwned;
     use twilight_model::{
         application::{
             command::{CommandOptionChoice, CommandOptionChoiceValue, CommandOptionType},
@@ -47,12 +46,13 @@ fn on_autocomplete(data: CommandData) -> Option<InteractionResponse> {
         })
         .map(|query| crate::util::autocomplete_tz(&query, 25))
         .unwrap_or_default()
+        .into_vec() // TODO: Remove this intermediate step in Edition 2024.
         .into_iter()
         .take(25)
         .map(|tz| CommandOptionChoice {
             name: tz.replace('_', " "),
             name_localizations: None,
-            value: CommandOptionChoiceValue::String(tz.to_owned()),
+            value: CommandOptionChoiceValue::String(String::from(tz.as_ref())),
         })
         .collect();
 

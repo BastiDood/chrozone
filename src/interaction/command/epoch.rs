@@ -93,10 +93,11 @@ pub fn execute(data: CommandData) -> error::Result<InteractionResponseData> {
         };
     }
 
+    use jiff::civil;
     let (tz, year) = tz.zip(year).ok_or(error::Error::MissingRequired)?;
-    let date = jiff::civil::Date::constant(year, month, day);
-    let time = jiff::civil::Time::constant(hour, minute, second, 0);
-    let datetime = jiff::civil::DateTime::from_parts(date, time);
+    let date = civil::Date::constant(year, month, day);
+    let time = civil::Time::constant(hour, minute, second, 0);
+    let datetime = civil::DateTime::from_parts(date, time);
     let timestamp = match tz.to_zoned(datetime) {
         Ok(zoned) => zoned.timestamp().as_second(),
         Err(err) => {
