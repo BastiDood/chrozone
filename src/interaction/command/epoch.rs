@@ -93,12 +93,8 @@ pub fn execute(data: CommandData) -> error::Result<InteractionResponseData> {
         };
     }
 
-    use jiff::civil;
     let (tz, year) = tz.zip(year).ok_or(error::Error::MissingRequired)?;
-    let date = civil::Date::constant(year, month, day);
-    let time = civil::Time::constant(hour, minute, second, 0);
-    let datetime = civil::DateTime::from_parts(date, time);
-    let timestamp = match tz.to_zoned(datetime) {
+    let timestamp = match jiff::civil::datetime(year, month, day, hour, minute, second, 0).to_zoned(tz) {
         Ok(zoned) => zoned.timestamp().as_second(),
         Err(err) => {
             log::error!("Timezone conversion failed: {err}.");
