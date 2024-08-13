@@ -9,7 +9,7 @@ static CACHED_TIMEZONES: OnceLock<Box<[Box<str>]>> = OnceLock::new();
 /// ordering of the top `count` autocompletion results.
 ///
 /// # Panic
-/// Panics if `count` is greater than or equal to the length of [`TZ_VARIANTS`](chrono_tz::TZ_VARIANTS).
+/// Panics if `count` is greater than or equal to the number of timezones in the system database.
 pub fn autocomplete_tz(query: &str, count: usize) -> Box<[Box<str>]> {
     use core::cmp::Reverse;
     use float::TotalDouble;
