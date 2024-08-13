@@ -1,8 +1,9 @@
 pub mod float;
 pub mod sort;
 
-use std::sync::OnceLock;
-static CACHED_TIMEZONES: OnceLock<Box<[Box<str>]>> = OnceLock::new();
+use std::sync::LazyLock;
+static CACHED_TIMEZONES: LazyLock<Box<[Box<str>]>> =
+    LazyLock::new(|| jiff::tz::db().available().map(String::into_boxed_str).collect::<Vec<_>>().into_boxed_slice());
 
 /// Compares a `query` string to a list of supported IANA timezones. The return value
 /// is a vector of string slices, where the first `count` elements are an (unspecified)
@@ -14,9 +15,7 @@ pub fn autocomplete_tz(query: &str, count: usize) -> Box<[Box<str>]> {
     use core::cmp::Reverse;
     use float::TotalDouble;
 
-    let mut names = CACHED_TIMEZONES
-        .get_or_init(|| jiff::tz::db().available().map(String::into_boxed_str).collect::<Vec<_>>().into_boxed_slice())
-        .clone();
+    let mut names = CACHED_TIMEZONES.clone();
     let mut cache = hashbrown::HashMap::with_capacity(32);
 
     sort::top_n_by_key(&mut names, count, |tz| {
