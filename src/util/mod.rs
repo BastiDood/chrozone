@@ -21,7 +21,8 @@ pub fn autocomplete_tz(query: &str, count: usize) -> Box<[Box<str>]> {
     sort::top_n_by_key(&mut names, count, |tz| {
         if !cache.contains_key(tz) {
             let score = textdistance::str::jaro_winkler(tz, query);
-            cache.insert_unique_unchecked(tz.clone(), score);
+            let tz = tz.clone();
+            unsafe { cache.insert_unique_unchecked(tz, score) };
         }
         Reverse(TotalDouble(cache[tz]))
     });
