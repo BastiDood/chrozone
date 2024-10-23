@@ -8,7 +8,7 @@ pub fn base() -> Embed {
             name: String::from("Chrozone"),
             url: Some(String::from("https://github.com/BastiDood/chrozone")),
             icon_url: Some(String::from(
-                "https://raw.githubusercontent.com/BastiDood/chrozone/12d8f28767c27a84850f8c53a7fd7623419d23f6/docs/LOGO.png",
+                "https://cdn.discordapp.com/app-icons/1008989318901137459/777734d2d2a26c8d5f675931d97c3f85.png",
             )),
             proxy_icon_url: None,
         }),
