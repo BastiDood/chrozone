@@ -13,7 +13,7 @@ pub fn execute() -> InteractionResponseData {
                 components: vec![
                     Component::Button(Button {
                         style: ButtonStyle::Primary,
-                        emoji: Some(ReactionType::Unicode { name: String::from("robot") }),
+                        emoji: Some(ReactionType::Unicode { name: String::from('🤖') }),
                         label: Some(String::from("Install App")),
                         url: Some(String::from("https://discord.com/oauth2/authorize?client_id=1008989318901137459")),
                         custom_id: None,
@@ -21,7 +21,7 @@ pub fn execute() -> InteractionResponseData {
                     }),
                     Component::Button(Button {
                         style: ButtonStyle::Danger,
-                        emoji: Some(ReactionType::Unicode { name: String::from("bug") }),
+                        emoji: Some(ReactionType::Unicode { name: String::from('🐛') }),
                         label: Some(String::from("Report a Bug")),
                         url: Some(String::from("https://github.com/BastiDood/chrozone/issues/new")),
                         custom_id: None,
@@ -29,7 +29,7 @@ pub fn execute() -> InteractionResponseData {
                     }),
                     Component::Button(Button {
                         style: ButtonStyle::Secondary,
-                        emoji: Some(ReactionType::Unicode { name: String::from("technologist") }),
+                        emoji: Some(ReactionType::Unicode { name: String::from('💻') }),
                         label: Some(String::from("Fork the Code")),
                         url: Some(String::from("https://github.com/BastiDood/chrozone/fork")),
                         custom_id: None,
