@@ -20,6 +20,8 @@ const response = await fetch(endpoint, {
         {
             name: 'help',
             description: 'Summon the help menu.',
+            integration_types: [1],
+            contexts: [0, 1, 2],
             options: [
                 {
                     type: 3,
@@ -35,6 +37,8 @@ const response = await fetch(endpoint, {
         {
             name: 'epoch',
             description: 'Get the ISO-8601 timestamp from a date and timezone.',
+            integration_types: [1],
+            contexts: [0, 1, 2],
             options: [
                 {
                     type: 3,
