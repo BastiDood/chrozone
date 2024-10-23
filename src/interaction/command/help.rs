@@ -74,6 +74,21 @@ fn help() -> Embed {
     }
 }
 
+fn info() -> Embed {
+    Embed {
+        title: Some(String::from("Chrozone Information")),
+        description: Some(String::from(
+            "Show important information about the app: invite link, bug reports, and source code.",
+        )),
+        fields: Vec::from([EmbedField {
+            inline: false,
+            name: String::from("`/info`"),
+            value: String::from("Show the information page."),
+        }]),
+        ..super::embed::base()
+    }
+}
+
 fn default() -> Embed {
     Embed {
         title: Some(String::from("Chrozone Help")),
@@ -100,6 +115,7 @@ pub fn execute(mut data: CommandData) -> Option<InteractionResponseData> {
         Some(CommandDataOption { value: CommandOptionValue::String(val), .. }) => match val.as_str() {
             "epoch" => epoch,
             "help" => help,
+            "info" => info,
             _ => return None,
         },
         _ => default,

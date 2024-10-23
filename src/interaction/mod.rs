@@ -15,6 +15,7 @@ fn on_app_command(data: CommandData) -> error::Result<InteractionResponse> {
     let payload = match data.name.as_str() {
         "epoch" => command::epoch::execute(data),
         "help" => command::help::execute(data).ok_or(error::Error::UnknownCommand),
+        "info" => Ok(command::info::execute()),
         other => {
             log::error!("Invoked unknown /{other} command.");
             return Err(error::Error::UnknownCommand);
