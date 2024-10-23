@@ -35,6 +35,12 @@ const response = await fetch(endpoint, {
             ],
         },
         {
+            name: 'info',
+            description: 'Get important links and information about the app.',
+            integration_types: [1],
+            contexts: [0, 1, 2],
+        },
+        {
             name: 'epoch',
             description: 'Get the ISO-8601 timestamp from a date and timezone.',
             integration_types: [1],
