@@ -109,32 +109,60 @@ pub fn execute(data: CommandData) -> error::Result<InteractionResponseData> {
                 description: Some(String::from("Here are the possible ways to format your timestamp.")),
                 fields: Vec::from([
                     {
-                        let value = format!("<t:{timestamp}:t>");
-                        EmbedField { inline: false, name: format!("Short Time (`{value}`)"), value }
+                        let format = format!("<t:{timestamp}:t>");
+                        EmbedField {
+                            inline: false,
+                            name: format!("Short Time ({format})"),
+                            value: format!("```{format}```"),
+                        }
                     },
                     {
-                        let value = format!("<t:{timestamp}:T>");
-                        EmbedField { inline: false, name: format!("Long Time (`{value}`)"), value }
+                        let format = format!("<t:{timestamp}:T>");
+                        EmbedField {
+                            inline: false,
+                            name: format!("Long Time ({format})"),
+                            value: format!("```{format}```"),
+                        }
                     },
                     {
-                        let value = format!("<t:{timestamp}:d>");
-                        EmbedField { inline: false, name: format!("Short Date (`{value}`)"), value }
+                        let format = format!("<t:{timestamp}:d>");
+                        EmbedField {
+                            inline: false,
+                            name: format!("Short Date ({format})"),
+                            value: format!("```{format}```"),
+                        }
                     },
                     {
-                        let value = format!("<t:{timestamp}:D>");
-                        EmbedField { inline: false, name: format!("Long Date (`{value}`)"), value }
+                        let format = format!("<t:{timestamp}:D>");
+                        EmbedField {
+                            inline: false,
+                            name: format!("Long Date ({format})"),
+                            value: format!("```{format}```"),
+                        }
                     },
                     {
-                        let value = format!("<t:{timestamp}:f>");
-                        EmbedField { inline: false, name: format!("Short Full Date + Time (`{value}`)"), value }
+                        let format = format!("<t:{timestamp}:f>");
+                        EmbedField {
+                            inline: false,
+                            name: format!("Short Full Date + Time ({format})"),
+                            value: format!("```{format}```"),
+                        }
                     },
                     {
-                        let value = format!("<t:{timestamp}:F>");
-                        EmbedField { inline: false, name: format!("Long Full Date + Time (`{value}`)"), value }
+                        let format = format!("<t:{timestamp}:F>");
+                        EmbedField {
+                            inline: false,
+                            name: format!("Long Full Date + Time ({format})"),
+                            value: format!("```{format}```"),
+                        }
                     },
                     {
-                        let value = format!("<t:{timestamp}:R>");
-                        EmbedField { inline: false, name: format!("Relative (`{value}`)"), value }
+                        let format = format!("<t:{timestamp}:R>");
+                        EmbedField {
+                            inline: false,
+                            name: format!("Relative ({format})"),
+                            value: format!("```{format}```"),
+                        }
                     },
                 ]),
                 ..super::embed::base()
