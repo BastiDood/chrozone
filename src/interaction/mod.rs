@@ -4,25 +4,24 @@ mod error;
 
 use twilight_model::{
     application::interaction::{application_command::CommandData, Interaction},
-    http::interaction::InteractionResponse,
+    http::interaction::{InteractionResponse, InteractionResponseType},
 };
 
 /// Router for the various command handlers.
 fn on_app_command(data: CommandData) -> error::Result<InteractionResponse> {
-    use twilight_model::http::interaction::InteractionResponseType::ChannelMessageWithSource;
-
     // TODO: Verify command ID.
-    let payload = match data.name.as_str() {
-        "epoch" => command::epoch::execute(data),
-        "help" => command::help::execute(data).ok_or(error::Error::UnknownCommand),
-        "info" => Ok(command::info::execute()),
-        other => {
-            log::error!("Invoked unknown /{other} command.");
-            return Err(error::Error::UnknownCommand);
-        }
-    }?;
-
-    Ok(InteractionResponse { kind: ChannelMessageWithSource, data: Some(payload) })
+    Ok(InteractionResponse {
+        kind: InteractionResponseType::ChannelMessageWithSource,
+        data: Some(match data.name.as_str() {
+            "epoch" => command::epoch::execute(data)?,
+            "help" => command::help::execute(data).ok_or(error::Error::UnknownCommand)?,
+            "info" => command::info::execute(),
+            other => {
+                log::error!("Invoked unknown /{other} command.");
+                return Err(error::Error::UnknownCommand);
+            }
+        }),
+    })
 }
 
 fn on_autocomplete(data: CommandData) -> Option<InteractionResponse> {
