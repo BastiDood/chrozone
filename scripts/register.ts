@@ -30,6 +30,7 @@ const response = await fetch(endpoint, {
                     choices: [
                         { name: '/epoch', value: 'epoch' },
                         { name: '/help', value: 'help' },
+                        { name: '/info', value: 'info' },
                     ],
                 },
             ],

@@ -97,6 +97,11 @@ fn default() -> Embed {
             EmbedField { inline: false, name: String::from("`/help`"), value: String::from("Summon this help menu.") },
             EmbedField {
                 inline: false,
+                name: String::from("`/info`"),
+                value: String::from("Show the information page."),
+            },
+            EmbedField {
+                inline: false,
                 name: String::from("`/epoch timezone year [month] [day] [hour] [min] [sec] [preview]`"),
                 value: String::from("Get the ISO-8601 timestamp (in seconds) for some date and timezone."),
             },
