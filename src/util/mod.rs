@@ -13,7 +13,11 @@ pub fn autocomplete_tz(query: &str, count: usize) -> Box<[Box<str>]> {
     use std::sync::LazyLock;
 
     static CACHED_TIMEZONES: LazyLock<Box<[Box<str>]>> = LazyLock::new(|| {
-        jiff::tz::db().available().map(|tz| tz.as_str().into()).collect::<Vec<_>>().into_boxed_slice()
+        jiff::tz::db()
+            .available()
+            .map(|tz| tz.as_str().into())
+            .collect::<Vec<_>>()
+            .into_boxed_slice()
     });
 
     let mut names = CACHED_TIMEZONES.clone();

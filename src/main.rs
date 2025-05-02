@@ -33,11 +33,13 @@ fn main() -> anyhow::Result<()> {
             let outer = arc_pub_key.clone();
             let service = hyper::service::service_fn(move |req| {
                 let inner = outer.clone();
-                let (hyper::http::request::Parts { headers, method, uri, .. }, body) = req.into_parts();
+                let (hyper::http::request::Parts { headers, method, uri, .. }, body) =
+                    req.into_parts();
                 async move {
-                    let response = chrozone::try_respond(body, method, uri.path(), &headers, inner.as_ref())
-                        .await
-                        .unwrap_or_else(chrozone::from_err_status);
+                    let response =
+                        chrozone::try_respond(body, method, uri.path(), &headers, inner.as_ref())
+                            .await
+                            .unwrap_or_else(chrozone::from_err_status);
                     Ok::<_, core::convert::Infallible>(response)
                 }
             });

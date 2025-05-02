@@ -1,6 +1,7 @@
 use super::error;
 use twilight_model::{
-    application::interaction::application_command::CommandData, http::interaction::InteractionResponseData,
+    application::interaction::application_command::CommandData,
+    http::interaction::InteractionResponseData,
 };
 
 /// Handler for the `/epoch` command.
@@ -8,8 +9,8 @@ pub fn execute(data: CommandData) -> error::Result<InteractionResponseData> {
     use twilight_model::{
         application::interaction::application_command::{CommandDataOption, CommandOptionValue},
         channel::message::{
-            embed::{Embed, EmbedField},
             MessageFlags,
+            embed::{Embed, EmbedField},
         },
     };
 
@@ -94,19 +95,22 @@ pub fn execute(data: CommandData) -> error::Result<InteractionResponseData> {
     }
 
     let (tz, year) = tz.zip(year).ok_or(error::Error::MissingRequired)?;
-    let timestamp = match jiff::civil::datetime(year, month, day, hour, minute, second, 0).to_zoned(tz) {
-        Ok(zoned) => zoned.timestamp().as_second(),
-        Err(err) => {
-            log::error!("Timezone conversion failed: {err}.");
-            return Err(error::Error::InvalidArgs);
-        }
-    };
+    let timestamp =
+        match jiff::civil::datetime(year, month, day, hour, minute, second, 0).to_zoned(tz) {
+            Ok(zoned) => zoned.timestamp().as_second(),
+            Err(err) => {
+                log::error!("Timezone conversion failed: {err}.");
+                return Err(error::Error::InvalidArgs);
+            }
+        };
 
     Ok(if preview {
         InteractionResponseData {
             embeds: Some(Vec::from([Embed {
                 title: Some(String::from("Timestamp Preview")),
-                description: Some(String::from("Here are the possible ways to format your timestamp.")),
+                description: Some(String::from(
+                    "Here are the possible ways to format your timestamp.",
+                )),
                 fields: Vec::from([
                     {
                         let format = format!("<t:{timestamp}:t>");

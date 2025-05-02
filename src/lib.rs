@@ -3,8 +3,8 @@ mod util;
 
 use http_body_util::Full;
 use hyper::{
-    body::{Bytes, Incoming},
     HeaderMap, Method, Response, StatusCode,
+    body::{Bytes, Incoming},
 };
 
 pub fn from_err_status(code: StatusCode) -> Response<Full<Bytes>> {
@@ -39,9 +39,11 @@ pub async fn try_respond(
             // Retrieve security headers
             let signature = headers.get("X-Signature-Ed25519");
             let timestamp = headers.get("X-Signature-Timestamp");
-            let (signature, timestamp) = signature.zip(timestamp).ok_or(StatusCode::UNAUTHORIZED)?;
+            let (signature, timestamp) =
+                signature.zip(timestamp).ok_or(StatusCode::UNAUTHORIZED)?;
             let signature = hex::decode(signature).map_err(|_| StatusCode::BAD_REQUEST)?;
-            let signature = ed25519_dalek::Signature::from_slice(&signature).map_err(|_| StatusCode::BAD_REQUEST)?;
+            let signature = ed25519_dalek::Signature::from_slice(&signature)
+                .map_err(|_| StatusCode::BAD_REQUEST)?;
             log::debug!("Timestamp and signature retrieved.");
 
             // Append body after the timestamp
@@ -72,9 +74,11 @@ pub async fn try_respond(
             log::debug!("Interaction JSON body parsed.");
 
             let reply = interaction::respond(interaction);
-            let body = serde_json::to_string(&reply).map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?.into();
+            let body = serde_json::to_string(&reply)
+                .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?
+                .into();
 
-            use hyper::header::{HeaderValue, CONTENT_TYPE};
+            use hyper::header::{CONTENT_TYPE, HeaderValue};
             let mut res = Response::new(body);
             res.headers_mut().append(CONTENT_TYPE, HeaderValue::from_static("application/json"));
             Ok(res)

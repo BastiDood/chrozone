@@ -3,7 +3,7 @@ mod embed;
 mod error;
 
 use twilight_model::{
-    application::interaction::{application_command::CommandData, Interaction},
+    application::interaction::{Interaction, application_command::CommandData},
     http::interaction::{InteractionResponse, InteractionResponseType},
 };
 
@@ -30,7 +30,9 @@ fn on_autocomplete(data: CommandData) -> Option<InteractionResponse> {
             command::{CommandOptionChoice, CommandOptionChoiceValue, CommandOptionType},
             interaction::application_command::{CommandDataOption, CommandOptionValue::Focused},
         },
-        http::interaction::{InteractionResponseData, InteractionResponseType::ApplicationCommandAutocompleteResult},
+        http::interaction::{
+            InteractionResponseData, InteractionResponseType::ApplicationCommandAutocompleteResult,
+        },
     };
 
     if data.name.as_str() != "epoch" {
@@ -107,7 +109,9 @@ pub fn respond(interaction: Interaction) -> InteractionResponse {
         use std::string::ToString;
         use twilight_model::{
             channel::message::MessageFlags,
-            http::interaction::{InteractionResponseData, InteractionResponseType::ChannelMessageWithSource},
+            http::interaction::{
+                InteractionResponseData, InteractionResponseType::ChannelMessageWithSource,
+            },
         };
         InteractionResponse {
             kind: ChannelMessageWithSource,
