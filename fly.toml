@@ -1,6 +1,9 @@
 app = 'chrozone'
 primary_region = 'sin'
 
+[deploy]
+strategy = 'bluegreen'
+
 [http_service]
 internal_port = 3000
 force_https = true
