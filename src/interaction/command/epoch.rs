@@ -27,62 +27,55 @@ pub fn execute(data: CommandData) -> error::Result<InteractionResponseData> {
     // Parse each argument
     for CommandDataOption { name, value } in data.options {
         log::info!("Received argument [{name}] as {value:?}.");
-
-        if name.as_str() == "timezone" {
-            let text = if let CommandOptionValue::String(text) = value {
-                text.into_boxed_str()
-            } else {
-                log::error!("Non-string command option value encountered for timezone.");
-                return Err(error::Error::Fatal);
-            };
-            tz = Some(match jiff::tz::TimeZone::get(&text) {
-                Ok(timezone) => timezone,
-                Err(err) => {
-                    log::error!("Failed to set timezone: {err}.");
-                    return Err(error::Error::UnknownTimezone);
-                }
-            });
-            continue;
-        }
-
-        if name.as_str() == "preview" {
-            preview = if let CommandOptionValue::Boolean(preview) = value {
-                preview
-            } else {
-                log::error!("Non-boolean command option value encountered for preview.");
-                return Err(error::Error::Fatal);
-            };
-            continue;
-        }
-
-        let num = if let CommandOptionValue::Integer(num) = value {
-            num
-        } else {
-            log::error!("Incorrect command option value received.");
-            return Err(error::Error::Fatal);
-        };
-
-        if name.as_str() == "year" {
-            year = Some(match i16::try_from(num) {
-                Ok(val) => val,
-                Err(err) => {
-                    log::error!("Integer argument is out of range: {err}.");
-                    return Err(error::Error::OutOfRange);
-                }
-            });
-            continue;
-        }
-
         let target = match name.as_str() {
+            "preview" => {
+                if let CommandOptionValue::Boolean(value) = value {
+                    preview = value;
+                } else {
+                    log::error!("Incorrect command option value received.");
+                    return Err(error::Error::Fatal);
+                }
+                continue;
+            }
+            "timezone" => {
+                let CommandOptionValue::String(text) = value else {
+                    log::error!("Non-string command option value encountered for timezone.");
+                    return Err(error::Error::Fatal);
+                };
+                tz = Some(match jiff::tz::TimeZone::get(text.as_str()) {
+                    Ok(timezone) => timezone,
+                    Err(err) => {
+                        log::error!("Failed to set timezone: {err}.");
+                        return Err(error::Error::UnknownTimezone);
+                    }
+                });
+                continue;
+            }
+            "year" => {
+                let CommandOptionValue::Integer(num) = value else {
+                    log::error!("Non-integer command option value encountered for year.");
+                    return Err(error::Error::Fatal);
+                };
+                year = Some(match i16::try_from(num) {
+                    Ok(val) => val,
+                    Err(err) => {
+                        log::error!("Integer argument is out of range: {err}.");
+                        return Err(error::Error::OutOfRange);
+                    }
+                });
+                continue;
+            }
             "month" => &mut month,
             "day" => &mut day,
             "hour" => &mut hour,
             "minute" => &mut minute,
-            "secs" => &mut second,
-            other => {
-                log::error!("Unable to parse command name {other}.");
-                return Err(error::Error::InvalidArgs);
-            }
+            "second" => &mut second,
+            other => unimplemented!("Unable to parse command name {other}."),
+        };
+
+        let CommandOptionValue::Integer(num) = value else {
+            log::error!("Non-integer command option value encountered for year.");
+            return Err(error::Error::Fatal);
         };
 
         *target = match i8::try_from(num) {
