@@ -18,7 +18,7 @@ tokio = { version = "1.41", features = ["net", "rt-multi-thread"] }
 twilight-model = "0.16.0"
 
 [dependencies.hashbrown]
-version = "0.15"
+version = "0.16"
 default-features = false
 features = ["default-hasher", "inline-more"]
 
