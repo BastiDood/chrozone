@@ -9,8 +9,10 @@ use twilight_model::{
 pub fn execute() -> InteractionResponseData {
     InteractionResponseData {
         components: Some(vec![Component::ActionRow(ActionRow {
+            id: None,
             components: vec![
                 Component::Button(Button {
+                    id: None,
                     style: ButtonStyle::Link,
                     emoji: Some(EmojiReactionType::Unicode { name: String::from('🤖') }),
                     label: Some(String::from("Install App")),
@@ -22,6 +24,7 @@ pub fn execute() -> InteractionResponseData {
                     disabled: false,
                 }),
                 Component::Button(Button {
+                    id: None,
                     style: ButtonStyle::Link,
                     emoji: Some(EmojiReactionType::Unicode { name: String::from('🐛') }),
                     label: Some(String::from("Report a Bug")),
@@ -31,6 +34,7 @@ pub fn execute() -> InteractionResponseData {
                     disabled: false,
                 }),
                 Component::Button(Button {
+                    id: None,
                     style: ButtonStyle::Link,
                     emoji: Some(EmojiReactionType::Unicode { name: String::from('💻') }),
                     label: Some(String::from("Fork the Code")),

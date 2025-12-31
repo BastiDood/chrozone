@@ -15,7 +15,7 @@ jiff = "0.2.11"
 log = "0.4.22"
 textdistance = "1.1"
 tokio = { version = "1.41", features = ["net", "rt-multi-thread"] }
-twilight-model = "0.16.0"
+twilight-model = "0.17.1"
 
 [dependencies.hashbrown]
 version = "0.16"
