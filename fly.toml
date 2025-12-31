@@ -1,5 +1,5 @@
 app = 'chrozone'
-primary_region = 'sin'
+primary_region = 'iad'
 
 [deploy]
 strategy = 'bluegreen'
@@ -12,11 +12,11 @@ auto_start_machines = true
 min_machines_running = 0
 
 [[http_service.checks]]
-grace_period = "5s"
-interval = "10s"
-timeout = "5s"
-method = "GET"
-path = "/"
+method = 'GET'
+path = '/'
+grace_period = '5s'
+interval = '10s'
+timeout = '5s'
 
 [[vm]]
 size = 'shared-cpu-1x'
